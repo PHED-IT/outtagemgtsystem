@@ -11,7 +11,7 @@ class Auth_model extends CI_Model
 	
 	public function login($data){
 		//check email exist
-		$query=$this->db->get_where($this->user_table,array('email'=>$data['email']));
+		$query=$this->db->get_where($this->user_table,array('staff_id'=>$data['staff_id']));
 		if ($this->db->affected_rows()>0) {
 			//email exist
 

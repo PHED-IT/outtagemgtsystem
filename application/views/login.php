@@ -1,26 +1,89 @@
-<form action="" method="POST">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" placeholder="johndoe@site.com" value="<?php echo set_value('email'); ?>" class="form-control form-control-line" name="email" id="email">
-                        <?php echo form_error('email','<span style="color:red">','</span>'); ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
+  <title>Login| PHED</title>
+  <!-- General CSS Files -->
+  <link rel="stylesheet" href="<?php echo asset_url();?>css/app.min.css">
+  <link rel="stylesheet" href="<?php echo asset_url();?>bundles/bootstrap-social/bootstrap-social.css">
+  <!-- Template CSS -->
+  <link rel="stylesheet" href="<?php echo asset_url();?>css/style.css">
+  <link rel="stylesheet" href="<?php echo asset_url();?>css/components.css">
+  <!-- Custom style CSS -->
+  <link rel="stylesheet" href="<?php echo asset_url();?>css/custom.css">
+  <!-- <link rel='shortcut icon' type='image/x-icon' href='assets/img/favicon.ico' /> -->
+</head>
+
+<body style="background-image: url(<?php echo asset_url();?>img/site-bg.jpg)">
+  <div class="loader"></div>
+  <div id="app">
+    <section class="section">
+      <div class="container mt-5">
+        <div class="row">
+             
+          <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
+            <?php $this->load->view('Flash_alert/alert'); ?>
+            <div class="card card-primary">
+              <div class="card-header">
+                <h4>Login</h4>
+              </div>
+              <div class="card-body">
+                <form method="POST" action="#" class="needs-validation" novalidate="">
+                  <div class="form-group">
+                    <label for="staffid">Staff ID</label>
+                    <input id="staffid" type="text" class="form-control" name="staff_id" tabindex="1" required autofocus>
+                    <div class="invalid-feedback">
+                      Please fill in your staff Id
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" value="<?php echo set_value('email'); ?>" placeholder="password" id="password" name="password" class="form-control form-control-line">
-                         <?php echo form_error('password','<span style="color:red">','</span>'); ?>
+                  </div>
+                  <div class="form-group">
+                    <div class="d-block">
+                      <label for="password" class="control-label">Password</label>
+                      <div class="float-right">
+                        <a href="" class="text-small">
+                          Forgot Password?
+                        </a>
+                      </div>
                     </div>
-                    <div class="form-group">
-                        <button class="btn btn-block btn-lg btn-primary text-uppercase fs-12 fw-600" type="submit">Login</button>
+                    <input id="password" type="password" class="form-control" name="password" tabindex="2" required>
+                    <div class="invalid-feedback">
+                      please fill in your password
                     </div>
-                    <div class="form-group no-gutters mb-0">
-                        <div class="col-md-12 d-flex">
-                            <div class="checkbox checkbox-primary mr-auto mr-0-rtl ml-auto-rtl">
-                                <label class="d-flex">
-                                    <input type="checkbox"> <span class="label-text">Remember me</span>
-                                </label>
-                            </div><a href="javascript:void(0)" id="to-recover" class="my-auto pb-2 text-right"><i class="material-icons mr-2 fs-18">lock</i> Forgot Password?</a>
-                        </div>
-                        <!-- /.col-md-12 -->
+                  </div>
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" name="remember" class="custom-control-input" tabindex="3" id="remember-me">
+                      <label class="custom-control-label" for="remember-me">Remember Me</label>
                     </div>
-                    <!-- /.form-group -->
+                  </div>
+                  <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
+                      Login
+                    </button>
+                  </div>
                 </form>
+                
+               
+              </div>
+            </div>
+            <!-- <div class="mt-5 text-muted text-center">
+              Don't have an account? <a href="auth-register.html">Create One</a>
+            </div> -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <!-- General JS Scripts -->
+  <script src="<?php echo asset_url();?>js/app.min.js"></script>
+  <!-- JS Libraies -->
+  <!-- Page Specific JS File -->
+  <!-- Template JS File -->
+  <script src="<?php echo asset_url();?>js/scripts.js"></script>
+  <!-- Custom JS File -->
+  <script src="<?php echo asset_url();?>js/custom.js"></script>
+</body>
+
+</html>

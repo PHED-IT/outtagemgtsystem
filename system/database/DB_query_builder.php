@@ -2263,6 +2263,24 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	 * @param	string	The table to inspect
 	 * @return	string
 	 */
+
+// 	public function get_compiled_select($table = '', $reset = TRUE)
+// 	{
+//     if ($table != '')
+//     {
+//         $this->_track_aliases($table);
+//         $this->from($table);
+//     }
+
+//     $select =  $this->_compile_select();
+
+//     if ($reset === TRUE)
+//     {
+//         $this->_reset_select();
+//     }
+
+//     return $select;
+// }
 	protected function _track_aliases($table)
 	{
 		if (is_array($table))

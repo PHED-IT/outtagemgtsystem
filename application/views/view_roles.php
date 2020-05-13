@@ -1,33 +1,13 @@
 
-            <!-- Page Title Area -->
-            <div class="row page-title clearfix">
-                <div class="page-title-left">
-                    <h6 class="page-title-heading mr-0 mr-r-5">View Roles</h6>
-                    
-                </div>
-                <!-- /.page-title-left -->
-                <div class="page-title-right d-none d-sm-inline-flex">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item active">Roles</li>
-                    </ol>
-                </div>
-                <!-- /.page-title-right -->
-            </div>
-            <!-- /.page-title -->
-            <!-- =================================== -->
-            <!-- Different data widgets ============ -->
-            <!-- =================================== -->
-            <div class="widget-list">
-                <div class="row">
-                    <div class="col-md-12 widget-holder">
-                        <div class="widget-bg">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>View roles</h4>
+                            </div>
                             <!-- <div class="widget-heading clearfix">
                                 <h5>jQuery DataTables</h5>
                             </div>
  -->                            <!-- /.widget-heading -->
-                            <div class="widget-body clearfix">
+                            <div class="card-body ">
                                 <table class="table table-striped table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
                                     <thead>
                                         <tr>
@@ -88,14 +68,7 @@
                             </div>
                             <!-- /.widget-body -->
                         </div>
-                        <!-- /.widget-bg -->
-                    </div>
-                    <!-- /.widget-holder -->
-                </div>
-                <!-- /.row -->
-            </div>
-            <!-- /.widget-list -->
-
+                   
             <script type="text/javascript">
                
             function handleDelete(id){

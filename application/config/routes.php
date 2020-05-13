@@ -54,5 +54,6 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 $route['assets/(:any)'] = 'assets/$1';
 $route['login'] = 'auth/login';
+$route['block'] = 'auth/block';
 // $route['(:any)'] = 'admin/$1';
 // $route['/'] = 'user/index';

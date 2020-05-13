@@ -1,64 +1,58 @@
-<div class="row page-title clearfix">
-                <div class="page-title-left">
-                    <h6 class="page-title-heading mr-0 mr-r-5"><?= isset($user) ? 'Edit user':'Create user'; ?></h6>
-                    <!-- <p class="page-title-description mr-0 d-none d-md-inline-block">statistics, charts and events</p> -->
-                </div>
-                <!-- /.page-title-left -->
-                <div class="page-title-right d-none d-sm-inline-flex">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<?php echo base_url(); ?>">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item active"><?= isset($user) ? 'Edit user':'Create user'; ?></li>
-                    </ol>
-                </div>
-                <!-- /.page-title-right -->
-            </div>
 
-
-            <div class="widget-list">
-                <div class="row">
-                    <div class="col-md-12 widget-holder">
-                        <div class="widget-bg">
-                            <div class="widget-body clearfix">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Edit user</h4>
+                            </div>
+                            <div class="card-body ">
                                 <!-- <h5 class="box-title mr-b-0">Horizontal Form</h5>
                                 <p class="text-muted">All bootstrap element classies</p> -->
 
                                 <form action="" method="POST">
-                                    <div class="form-group row">
-                                        <label class="col-md-3 col-form-label" for="first_name"> First name</label>
-                                        <div class="col-md-9">
+                                    <div class="row">
+                                    <div class="col-md-4 ">
+                                        <label class=" col-form-label" for="staff_id"> Staff Id</label>
+                                      
+                                            <input class="form-control" value="<?= isset($user) ? $user->staff_id:set_value('staff_id'); ?>" name="staff_id" id="staff_id" placeholder="Staff Id" type="text">
+                                   
+                                        <?php echo form_error('staff_id','<span style="color:red">','</span>'); ?>
+                                    </div>
+                                    <div class="col-md-4 ">
+                                        <label class=" col-form-label" for="first_name"> First name</label>
+                                      
                                             <input class="form-control" value="<?= isset($user) ? $user->first_name:set_value('first_name'); ?>" name="first_name" id="first_name" placeholder="First name" type="text">
-                                        </div>
+                                   
                                         <?php echo form_error('first_name','<span style="color:red">','</span>'); ?>
                                     </div>
 
-                                     <div class="form-group row">
-                                        <label class="col-md-3 col-form-label" for="last_name"> Last name</label>
-                                        <div class="col-md-9">
+                                     <div class="col-md-4">
+                                        <label class=" col-form-label" for="last_name"> Last name</label>
+                                     
                                             <input class="form-control" value="<?= isset($user) ? $user->last_name:set_value('last_name'); ?>" name="last_name" id="last_name" placeholder="Last name" type="text">
-                                        </div>
+                                      
                                         <?php echo form_error('last_name','<span style="color:red">','</span>'); ?>
                                     </div>
-
-                                     <div class="form-group row">
-                                        <label class="col-md-3 col-form-label" for="email"> Email</label>
-                                        <div class="col-md-9">
+                                </div>
+                                <div class="row">
+                                     <div class="col-md-6">
+                                        <label class="col-form-label" for="email"> Email</label>
+                                       
                                             <input class="form-control" value="<?= isset($user) ? $user->email:set_value('email'); ?>" name="email" id="email" placeholder="Email" type="email">
-                                        </div>
+                                        
                                         <?php echo form_error('email','<span style="color:red">','</span>'); ?>
                                     </div>
 
-                                     <div class="form-group row">
-                                        <label class="col-md-3 col-form-label" for="phone"> Phone</label>
-                                        <div class="col-md-9">
+                                     <div class="col-md-6">
+                                        <label class=" col-form-label" for="phone"> Phone</label>
+                                        
                                             <input class="form-control" value="<?= isset($user) ? $user->phone:set_value('phone'); ?>" name="phone" id="phone" placeholder="Phone number" type="text">
-                                        </div>
+                                        
                                         <?php echo form_error('phone','<span style="color:red">','</span>'); ?>
                                     </div>
-
-                                     <div class="form-group row">
-                                        <label class="col-md-3 col-form-label" for="role"> Assign role</label>
-                                        <div class="col-md-9">
+                                </div>
+                                   <div class="row">
+                                     <div class="col-md-4">
+                                        <label class="col-form-label" for="role">  Role</label>
+                                 
                                             <select class="form-control" name="role" id="role">
                                                 <?php
                                                     foreach ($roles as $key => $role) {
@@ -77,24 +71,93 @@
                                                     }
                                                 ?>
                                             </select>
-                                        </div>
+                                      
                                         <?php echo form_error('role','<span style="color:red">','</span>'); ?>
                                     </div>
-                                    
-                                    <div class="form-actions">
-                                        <div class="form-group row">
-                                            <div class="col-md-9 ml-md-auto btn-list">
-                                                <button  class="btn btn-primary btn-rounded" type="submit"><?= isset($user) ? 'Edit':'Submit'; ?></button>
-                                                <a href="<?= base_url('admin/view_users') ?>" class="btn btn-outline-default btn-rounded" type="button">Cancel</a>
-                                            </div>
-                                        </div>
+                                         <div class="col-md-4">
+                                        <label class="col-form-label" for="role">  Zones</label>
+                                 
+                                            <select class="form-control" name="zone_id" id="zone_id">
+                                                <option value="">Choose zone</option>
+                                                <?php
+                                                    foreach ($zones as $key => $value) {
+                                                        ?>
+                                                        <option 
+                                                        value="<?= $value->id ?>"
+                                                        <?php
+                                                            if (isset($user)) {
+                                                               if ($value->id==$user->zone_id) {
+                                                                   echo ' selected';
+                                                               }
+                                                            }
+                                                        ?>
+                                                            ><?= $value->name ?></option>
+                                                        <?php
+                                                    }
+                                                ?>
+                                            </select>
+                                      
+                                        <?php echo form_error('zone_id','<span style="color:red">','</span>'); ?>
                                     </div>
+                                       <div class="col-md-4">
+                                        <label class="col-form-label" for="role">  Sub zones</label>
+                                 
+                                            <select class="form-control" name="sub_zone_id" id="sub_zone_id">
+                                                <option value="">Choose Sub zones</option>
+                                                <?php
+                                                    foreach ($sub_zones as $key => $value) {
+                                                        ?>
+                                                        <option 
+                                                        value="<?= $value->id ?>"
+                                                        <?php
+                                                            if (isset($user)) {
+                                                               if ($value->id==$user->sub_zone_id) {
+                                                                   echo ' selected';
+                                                               }
+                                                            }
+                                                        ?>
+                                                            ><?= $value->name ?></option>
+                                                        <?php
+                                                    }
+                                                ?>
+                                            </select>
+                                      
+                                        <?php echo form_error('sub_zone_id','<span style="color:red">','</span>'); ?>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                         <div class="col-md-12">
+                                        <label class="col-form-label" for="iss">  Injection substation(optional)</label>
+                                 
+                                            <select class="form-control" name="iss" id="iss">
+                                                <option value="">Choose ISS(optional)</option>
+                                                <?php
+                                                    foreach ($iss_data as $key => $value) {
+                                                        ?>
+                                                        <option 
+                                                        value="<?= $value->id ?>"
+                                                        <?php
+                                                            if (isset($user)) {
+                                                               if ($value->id==$user->iss) {
+                                                                   echo ' selected';
+                                                               }
+                                                            }
+                                                        ?>
+                                                            ><?= $value->iss_names ?></option>
+                                                        <?php
+                                                    }
+                                                ?>
+                                            </select>
+                                      
+                                        <?php echo form_error('iss','<span style="color:red">','</span>'); ?>
+                                    </div>
+                                    </div>
+                                    <br/>
+                                    <button  class="btn btn-success btn-rounded" type="submit"><?= isset($user) ? 'Edit':'Submit'; ?></button>
+                                     <a  class="btn btn-primary btn-rounded" href="<?= base_url('admin/view_users') ?>">Back</a>
                                 </form>
                             </div>
                             <!-- /.widget-body -->
                         </div>
                         <!-- /.widget-bg -->
-                    </div>
-
-                </div>
-            </div>
+                   

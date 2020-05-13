@@ -6,7 +6,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Home_model extends CI_Model
 {
-	protected $asign_menus="asign_menus";
+	protected $asign_menus="assign_menus";
 	protected $asign_submenus="asign_submenus";
 	protected $menu_table="menus";
 	protected $submenu_table="sub_menus";
@@ -18,25 +18,28 @@ class Home_model extends CI_Model
 		// $query=$this->db->get();
 
 	public function get_menus($role_id){
-		$this->db->select('menu_id,role_id,name,name_alias,controller')->from($this->asign_menus);
+		$this->db->select('ass.menu_id as menu_id,ass.role_id as role_id,m.name as name,m.name_alias as name_alias,m.controller as controller');
 		//$this->db->distinct('asign_menus.menu_id');
-		$this->db->where('asign_menus.role_id',$role_id);
-		$this->db->join($this->menu_table,'menus.id=asign_menus.menu_id');
+		$this->db->from('assign_menus ass');
+		//$this->db->where('ass.role_id',$role_id);
+		$this->db->where('ass.role_id',$role_id);
+		$this->db->join('menus m','m.id=ass.menu_id');
 		//$this->db->group_by(array('asign_menus.role_id','asign_menus.menu_id'));
 		$query=$this->db->get();
 		$menus= $query->result();
 		$sub_menus=[];
 		$data='';
 		//var_dump($menus);
+		 
 		foreach ($query->result()as $menu) {
-			$data.= '<li class="current-page menu-item">
-			<a href=" '.base_url($menu->controller.'/'.$menu->name).'">
-			<i class="list-icon fa fa-circle-o"></i> <span class="hide-menu">'.$menu->name_alias.'</span>
+			$data.= '<li class="dropdown">
+			<a class="menu-toggle nav-link has-dropdown" href=" '.base_url($menu->controller.'/'.$menu->name).'">
+			<i data-feather="grid"></i> <span >'.$menu->name_alias.'</span>
 			</a>';
 				foreach ($this->get_submenus($menu->role_id,$menu->menu_id) as $sub_menu) {
-					$data.='<ul class="list-unstyled sub-menu">
+					$data.='<ul class="dropdown-menu">
 					<li>
-					<a style="color:#d0d0d0" href="'. base_url($sub_menu->controller.'/'.$sub_menu->name).'">'.
+					<a class="nav-link" href="'. base_url($sub_menu->controller.'/'.$sub_menu->name).'">'.
 					$sub_menu->name_alias.
 					'</a>
                      </li>
