@@ -46,9 +46,33 @@
 </div>
 
       <?php
+    }elseif ($user->role_id==35) {
+      # user is a transmission dso
+      ?>
+       <div class="row">
+             <div class="col-md-4 ts_div_log" id="">
+
+            <label> Transmission station</label>
+                <select class="form-control" name="trans_st" id="trans_st">
+                 <option value=""> Transmission Station</option>
+                 <option value="<?= $station->id ?>"><?= $station->tsname ?></option>
+                 
+                  </select>
+
+                  </div>
+                <div class="col-md-4 ts_div_log" id="">
+
+                <label>Power Transformer</label>
+                <select class="form-control" name="transformer" id="transformer_33">
+                <option value="">No Transformer data</option>
+                
+                 </select>
+                                                
+                </div>
+
+      <?php
     } else {
       ?>
-
               <div class="d-flex justify-content-start">   
                                              
                    <div class="radiobox radio-info">

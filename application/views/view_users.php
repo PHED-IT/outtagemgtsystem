@@ -27,8 +27,9 @@
                                             <th>Phone</th>
                                             <th>Role</th>
                                             <th>Zone</th>
-                                            <th>Sub Zone</th>
+                                            <th>33kv Feeder</th>
                                             <th>ISS</th>
+                                            <th>Transmission</th>
                                             <th></th>
                                             
                                         </tr>
@@ -46,8 +47,9 @@
                                                 <td><?= $user->phone; ?></td>
                                                 <td><?= $user->role_name; ?></td>
                                                 <td><?= $user->zone; ?></td>
-                                                <td><?= $user->sub_zone; ?></td>
+                                                <td><?= $user->feeder; ?></td>
                                                 <td><?= $user->iss; ?></td>
+                                                <td><?= $user->tsname; ?></td>
                                                 <td><a href="<?= base_url('admin/edit_user').'/'.$user->id ?>" class="btn btn-xs btn-info">Edit</a></td>
                                                 
                                             </tr>
@@ -75,11 +77,31 @@
             </button>
           </div>
           <div class="modal-body">
-           
+            <div class="row">
+                    <div class="col-md-12">
+                        
+                        <label class="col-form-label" required for=""> Role</label>
+                         <select class="form-control" required name="role" id="role">
+                          <option value="">Choose Role</option>
+                          <?php
+                              foreach ($roles as $key => $role) {
+                                  ?>
+                                  <option 
+                                  value="<?= $role->id ?>"
+                                  
+                                      ><?= $role->role_name ?></option>
+                                  <?php
+                              }
+                          ?>
+                      </select>
+                        
+                    </div>
+                    
+                </div>
                <div class="row">
                     <div class="col-md-12">
                         
-                        <label class="col-form-label"  for="reading"> Staff Id</label>
+                        <label class="col-form-label"  for=""> Staff Id</label>
                         
                         <input type="text" name="staff_id" required class="form-control">
                     </div>
@@ -88,13 +110,13 @@
               <div class="row">
                     <div class="col-md-6">
                         
-                        <label class="col-form-label" required for="reading"> First name</label>
+                        <label class="col-form-label" required for=""> First name</label>
                         
                         <input type="text" required name="first_name" class="form-control">
                     </div>
                     <div class="col-md-6">
                         
-                        <label class="col-form-label" required for="reading"> Last name</label>
+                        <label class="col-form-label" required for=""> Last name</label>
                         
                         <input type="text" required name="last_name" class="form-control">
                     </div>
@@ -103,43 +125,24 @@
                <div class="row">
                     <div class="col-md-6">
                         
-                        <label class="col-form-label" required for="reading"> Email</label>
+                        <label class="col-form-label" required for=""> Email</label>
                         
                         <input type="email" required name="email" class="form-control">
                     </div>
                     <div class="col-md-6">
                         
-                        <label class="col-form-label" required for="reading"> Phone number</label>
+                        <label class="col-form-label" required for=""> Phone number</label>
                         
                         <input type="text" required name="phone" placeholder="080********" class="form-control">
                     </div>
                 </div>
-                 <div class="row">
-                    <div class="col-md-12">
-                        
-                        <label class="col-form-label" required for="reading"> Role</label>
-                         <select class="form-control" required name="role" id="role">
-                                                <?php
-                                                    foreach ($roles as $key => $role) {
-                                                        ?>
-                                                        <option 
-                                                        value="<?= $role->id ?>"
-                                                        
-                                                            ><?= $role->role_name ?></option>
-                                                        <?php
-                                                    }
-                                                ?>
-                                            </select>
-                        
-                    </div>
-                    
-                </div>
+                
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-12">
                         
-                        <label class="col-form-label"  for=""> Zone(optional)</label>
+                    <label class="col-form-label"  for=""> Zone</label>
                         
-                       <select class="form-control" id="zone_id"  name="zone_id">
+                  <select class="form-control" id="zone_id" required  name="zone_id">
                <option value="">Choose zone</option>
                <?php
                 foreach ($zones as $key => $value) {
@@ -150,33 +153,51 @@
                ?>
               </select>
                     </div>
-                  <div class="col-md-6">
-                        
-                        <label class="col-form-label" required for=""> Sub-Zone(optional)</label>
-                        
-                       <select class="form-control" id="subzone_id"  name="sub_zone_id">
-               <option value="">Choose subzone</option>
-               <?php
-                foreach ($sub_zones as $key => $value) {
-                  ?>
-                  <option value="<?= $value->id ?>"><?= $value->name ?></option>
-                  <?php
-                }
-               ?>
-              </select>
-                    </div>
+                 
                   
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;" id="iss_div">
                   <div class="col-md-12">
-                    <label class="col-form-label" required for="reading"> Injection substation(DSO)</label>
+                    <label class="col-form-label" required for=""> Injection substation(DSO)</label>
                         
                        <select class="form-control" id="iss" name="iss">
-               <option value="">Choose ISS(optional)</option>
+               <option value="">Choose ISS</option>
                <?php
                 foreach ($iss_data as $key => $value) {
                   ?>
                   <option value="<?= $value->id ?>"><?= $value->iss_names ?></option>
+                  <?php
+                }
+               ?>
+              </select>
+                  </div>
+                </div>
+                 <div class="row" style="display: none;" id="33kv_div">
+                  <div class="col-md-12">
+                    <label class="col-form-label" required for=""> 33kv Feeder(Feeder Managers)</label>
+                        
+                       <select class="form-control" id="33kv_feeder" name="33kv_feeder">
+               <option value="">Choose 33kv Feeder</option>
+               <?php
+                foreach ($feeders_33 as $key => $value) {
+                  ?>
+                  <option value="<?= $value->id ?>"><?= $value->feeder_name ?></option>
+                  <?php
+                }
+               ?>
+              </select>
+                  </div>
+                </div>
+                <div class="row" style="display: none;" id="transmission_div" >
+                  <div class="col-md-12">
+                    <label class="col-form-label" required for=""> Transmission station</label>
+                        
+                       <select class="form-control" id="trans_station" name="trans_station">
+               <option value="">Choose Transmission station</option>
+               <?php
+                foreach ($transmissions as $key => $value) {
+                  ?>
+                  <option value="<?= $value->id ?>"><?= $value->tsname ?></option>
                   <?php
                 }
                ?>

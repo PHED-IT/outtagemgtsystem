@@ -1103,15 +1103,16 @@ $(document).on('blur','.pf_input', function (event) {
     message: 'Power factor must be between 0 and 1',
     position: 'topRight'
   });
-        //$(this).focus()
-        $(this).val(0.00)
-    
+        $(this).val(0.00)  
     }
-    }
-   
-     
-        
+    }    
 });
+
+
+$('#show_report_click').click(function(){
+  //$('#show_report_click').prop('disabled',true)
+  $('#show_report_click_div').show()
+})
 
 
 // $('.day_picker').click(function(){
@@ -1121,7 +1122,7 @@ $(document).on('blur','.pf_input', function (event) {
 //     if (year=="") {
 //         Swal.fire({
 //           position: 'top-end',
-//           type: 'error',
+//           type: 'error', 
 //           title: 'Please choose year',
 //           showConfirmButton: false,
 //           timer: 1500
@@ -1404,6 +1405,41 @@ $(document).on('click','.delete_menu',function(){
      })   
     }
 })
+//show select based on role selected
+$(document).on('change','#role',function(){
+    var role_id=$(this).val();
+    
+    if (role_id=="8") {
+      //dso
+      $('#iss_div').show()
+      $('#33kv_div').hide()
+      $('#transmission_div').hide()
+      //$('#33kv_feeder').val('')
+      $('#33kv_feeder').prop("selectedIndex",0);
+      $('#trans_station').prop("selectedIndex",0);
+    } else if(role_id=="12"){
+      //feeder manager
+      $('#iss_div').hide()
+      $('#transmission_div').hide()
+      $('#33kv_div').show()
+      $('#iss').prop("selectedIndex",0);
+      $('#trans_station').prop("selectedIndex",0);
+    }else if(role_id=="35"){
+      //transmission dso
+      $('#iss_div').hide()
+      $('#33kv_div').hide()
+      $('#transmission_div').show()
+      $('#iss').prop("selectedIndex",0);
+      $('#33kv_div').prop("selectedIndex",0);
+    }else{
+      $('#iss_div').hide()
+      $('#33kv_div').hide()
+      $('#transmission_div').hide();
+      $('#iss').prop("selectedIndex",0);
+      $('#33kv_feeder').prop("selectedIndex",0);
+      $('#trans_station').prop("selectedIndex",0);
+    }
+})
 
 $('#btn-show-section').click(function(){
     $('#form-section').toggle()
@@ -1637,7 +1673,7 @@ $(document).on('click','.acknowled_plan_out_tsm',function(){
                  $('#modal'+id).modal('hide')
                 $('#d'+id).hide()
                
-                $('#text'+id).text('Waiting Feeder manager approval')
+                $('#text'+id).text('Waiting HSO approval')
             }else{
                 Swal.fire({
                   position: 'top-end',
@@ -2277,7 +2313,7 @@ $(document).on('click','.action_plan_out_hibc',function(){
                 $('#modal'+id).modal('hide')
                 // $('#d'+id).hide()
                
-                $('#text'+id).text('Waiting central dispatch approval')
+                $('#text'+id).text('Waiting Network manager approval')
             }else{
                 Swal.fire({
                   position: 'top-end',
@@ -2556,7 +2592,7 @@ $(document).on('submit','.cd_approve_date_plan_out',function(e){
 $(document).on('submit','#faultReponseForm',function(e){
     e.preventDefault();
     //var id=$(this).attr('data-id');
-    e.preventDefault()
+    //e.preventDefault()
     var url=BASE_URL+"FaultResponse/store_fault_response_request";
     Swal.fire({
   title: 'Are you sure?',
@@ -2575,24 +2611,47 @@ $(document).on('submit','#faultReponseForm',function(e){
         // $('#sub'+id).html('<span class="fa fa-spinner fa-pulse"></span>')
         var form=$(this);
     var data=form.serialize();
+    console.log(data)
      $.ajax({
         url:url,
         type:'POST',
         data:data,
         success:function(response){
-            spinner.hide();
+            
             console.log(response)
             var data=JSON.parse(response);
             if (data.status) {
                 //$('#modal'+id).modal('hide')
-               
-                  iziToast.success({
-    title: 'Success!',
-    message: 'Request is successfull',
-    position: 'topRight'
-  });
-                  alert("Success! Your outage id is: "+data.outage_id);
+                if (data.assetId!="") {
+                $.post("http://10.10.25.31:8084/nomsapiwslim/v1/getCustomersPhoneByAssets",
+  {
+    assetid: data.assetId,
+    assettype:data.assetType,
+
+  },
+  function(resp, status){
+    console.log("rec",resp)
+    $.post(BASE_URL+"FaultResponse/store_customers_contact",
+      { records : JSON.stringify(resp) ,outage_id:JSON.stringify(data.outage_id)},
+      function(result,status){
+        spinner.hide();
+         alert("Success! Your fault id is: "+data.outage_id);
                   $("#faultReponseForm")[0].reset()
+      }
+      )
+  });
+            }else{
+              spinner.hide();
+              alert("Success! Your fault id is: "+data.outage_id);
+                  $("#faultReponseForm")[0].reset()
+            }
+               
+  //                 iziToast.success({
+  //   title: 'Success!',
+  //   message: 'Request is successfull',
+  //   position: 'topRight'
+  // });
+                  
                   //window.history.back();
                  //$('#div'+id).hide();
                // location.reload();
@@ -3239,7 +3298,6 @@ $(document).on('submit','.submit_report_lines_man',function(e){
 })
 var allowSubmit = false;
 $(document).on('submit','#showLoadReportForm',function(e){
-
  
   if (!allowSubmit) {
   if ($('#feeder_name').val()=="") {
@@ -3292,7 +3350,7 @@ $(document).on('submit','.tso_reject_plan_out',function(e){
                 Swal.fire({
                   position: 'top-end',
                   type: 'success',
-                  title: "Rejection is sucessful!",
+                  title: "Rejection is sucessfull!",
                   showConfirmButton: false,
                   timer: 1000
                 });
@@ -3326,6 +3384,17 @@ $(document).on('submit','.tso_reject_plan_out',function(e){
     }
     })
 })
+
+
+$('.report_type').change(function(){
+  $('#show_report_click').prop('disabled',false)
+  if ($('.report_type option:selected').val()=="coincidental") {
+        $('.ts_div_log').show();
+    } else {
+        $('.ts_div_log').hide();
+    }
+})
+
 
 $('#feeder_name').change(function(){
     var url=BASE_URL+"input/getLatestFeederReading";
@@ -3426,6 +3495,98 @@ $('.feeder_type_log').change(function(){
     }
     })
 })
+
+$('#zone_map').change(function(){
+    var zone_id=$(this).val();
+    
+    var url=BASE_URL+"mis/get_feeders_by_zone_voltage";
+    
+    $.ajax({
+        url:url,
+        type:'POST',
+        data:{zone_id:zone_id,voltage_level:$('#voltage_level_map').val()},
+        success:function(response){
+            console.log(response)
+            var station=JSON.parse(response);
+           // $('#feeder_id').html('')
+            //$('#feeder_name').append("<option value='all'>All "+type+"</option>");
+            //$('#spinner').html('')
+            if (station.length>0) {
+
+              $('#feeder_id').html('');
+                    // $('#feeder_id').prepend('<option value="">Select</option>');
+                    $.each(station,function(index,obj){
+                    //var html='<option>';
+                html="<option value='"+obj.enum_id+"'>";
+                html+=obj.feeder_name
+                html+="</option>";
+                    
+                //var x = temp.replace(/{{feeder_name}}/ig, obj.feeder_name);
+                $('#feeder_id').append(html);
+                //html="";
+               //html+="<option value='all'>All "+type+"</option>"
+       
+        })
+      }else{
+        iziToast.error({
+    title: 'Info!',
+    message: "No "+$('#voltage_level_map').val()+" feeder on fault in this zone",
+    position: 'topRight'
+  });
+      }
+    },
+    error:function(error){
+        console.log(error)
+    }
+    })
+})
+  
+$('#voltage_level_map').change(function(){
+    var zone_id=$('#zone_map').val();
+    var voltage_level=$(this).val();
+    
+    var url=BASE_URL+"mis/get_feeders_by_zone_voltage";
+    
+    $.ajax({
+        url:url,
+        type:'POST',
+        data:{zone_id:zone_id,voltage_level:voltage_level},
+        success:function(response){
+            console.log(response)
+            var station=JSON.parse(response);
+            $('#feeder_id').html('')
+            //$('#feeder_name').append("<option value='all'>All "+type+"</option>");
+            //$('#spinner').html('')
+            if (station.length>0) {
+
+              $('#feeder_id').html('');
+                    // $('#feeder_id').prepend('<option value="">Select</option>');
+                    $.each(station,function(index,obj){
+                    //var html='<option>';
+                html="<option value='"+obj.enum_id+"'>";
+                html+=obj.feeder_name
+                html+="</option>";
+                    
+                //var x = temp.replace(/{{feeder_name}}/ig, obj.feeder_name);
+                $('#feeder_id').append(html);
+                //html="";
+               //html+="<option value='all'>All "+type+"</option>"
+       
+        })
+      }else{
+        iziToast.error({
+    title: 'Info!',
+    message: "No "+voltage_level+" feeder on fault in this zone",
+    position: 'topRight'
+  });
+      }
+    },
+    error:function(error){
+        console.log(error)
+    }
+    })
+})
+  
 
 
 
@@ -3566,6 +3727,33 @@ $('#simpleTable2').DataTable({
         ]
     } );
 $('#simpleTable_fualt').DataTable({
+        "order": [[ 3, "desc" ]],
+         dom: 'Bfrtip',
+        buttons: [
+               {
+                extend:    'copyHtml5',
+                text:      '<i class="fa fa-files-o"></i>',
+                titleAttr: 'Copy'
+            },
+            {
+                extend:    'excelHtml5',
+                text:      '<i class="fa fa-file-excel-o"></i>',
+                titleAttr: 'Excel'
+            },
+            {
+                extend:    'csvHtml5',
+                text:      '<i class="fa fa-file-text-o"></i>',
+                titleAttr: 'CSV'
+            },
+            {
+                extend:    'pdfHtml5',
+                text:      '<i class="fa fa-file-pdf-o"></i>',
+                titleAttr: 'PDF'
+            }
+           
+        ]
+    } );
+$('#simpleTable_fualt2').DataTable({
         "order": [[ 3, "desc" ]],
          dom: 'Bfrtip',
         buttons: [

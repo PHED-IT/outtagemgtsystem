@@ -14,7 +14,7 @@ class Mis_model extends CI_Model
 	protected $fault_cause_table="fault_causes";
 	protected $fault_indicator_table="fault_indicators";
 	
-	//protected $transmission_transformer_table="transmission_transformer";     
+	protected $transmission_transformer_table="transmission_transformer";     
 	
 	public function get_log_sheet($data){
 		//var_dump($data);
@@ -82,30 +82,6 @@ class Mis_model extends CI_Model
 		// $dif=$this->get_reading_first-
 		
 	}
-
-	public function get_feeders_by_zone_voltage($data){
-		if ($data['voltage_level']=="33kv") {
-			$this->db->select("feeders_33kv.*,transmissions.zone_id ");
-		$this->db->from("transmissions");
-		$this->db->join("fault_responses ","fault_responses.station_id=transmissions.id and fault_responses.voltage_level='33kv'");
-		$this->db->join("zones ","zones.id=transmissions.zone_id");
-		$this->db->join("feeders_33kv ","feeders_33kv.id=fault_responses.equipment_id");
-		$this->db->where(["zones.id"=>$data['zone_id'],'fault_responses.date_closed'=>null]);
-		$this->db->group_by("fault_responses.equipment_id");
-		$query=$this->db->get();
-		return $query->result();
-		}else{
-			//11kv violage
-			$this->db->select("feeders_11kv.*,feeder33kv_iss.zone_id ");
-		$this->db->from("feeder33kv_iss");
-		$this->db->join("fault_responses ","fault_responses.station_id=feeder33kv_iss.iss_id and voltage_level='11kv'");
-		$this->db->join("feeders_11kv ","feeders_11kv.id=fault_responses.equipment_id");
-		$this->db->where(["feeder33kv_iss.zone_id"=>$data['zone_id'],'fault_responses.date_closed'=>null]);
-		$this->db->group_by("fault_responses.equipment_id");
-		$query=$this->db->get();
-		return $query->result();
-		}
-	}
 		public function get_energy_consumption_log_sheet($data){
 		//var_dump($data);
 		 list($month,$year)=$this->substr_date($data['date']);
@@ -169,7 +145,7 @@ class Mis_model extends CI_Model
 			if ($weather=="day") {
 				if (isset($data['incommer'])) {
 					$incommer=$data['incommer'];
-				$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=6 AND hour<=18)");
+				$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=0 AND hour<=17)");
 				} else {
 					//feeder
 				$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}'  and feeder_id='".$data['feeder_id']."' AND hour >=0 AND hour<=17)");
@@ -180,7 +156,7 @@ class Mis_model extends CI_Model
 			}elseif ($weather=="night") {
 				if (isset($data['incommer'])) {
 					$incommer=$data['incommer'];
-					$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=5 AND hour<=19)");
+					$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=18 AND hour<=23)");
 				} else {
 					# feeder
 			$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and feeder_id='".$data['feeder_id']."' AND hour >=18 AND hour<=23)");
@@ -312,7 +288,7 @@ class Mis_model extends CI_Model
 	}
 	public function get_transmission_stations(){
 		
-		$this->db->select("tsname,id,zone_id");
+		$this->db->select("tsname,id");
 		$query=$this->db->get("transmissions");
 		return $query->result();
 	}
@@ -526,37 +502,6 @@ class Mis_model extends CI_Model
 	// 	$out.="</tbody>";
 	// 	return $out;
 	// }
-	//this function returns total load feeder wise / transformer wise by month
-	public function get_total_load_feeder($data){
-		list($month,$year)=$this->substr_date($data['date']);
-		$this->db->select_sum('load_reading');
-		$this->db->from($this->log_sheet_table);
-		
-		$this->db->where(['isIncommer'=>0,'MONTH(created_at)'=>$month,'YEAR(created_at)'=>$year]);
-		$query=$this->db->get();	
-		return $query->row();
-	}
-public function get_total_load_transformer($data){
-		list($month,$year)=$this->substr_date($data['date']);
-		$this->db->select_sum('load_reading');
-		$this->db->from($this->log_sheet_table);
-		
-		$this->db->where(['isIncommer'=>1,'MONTH(created_at)'=>$month,'YEAR(created_at)'=>$year]);
-		$query=$this->db->get();	
-		return $query->row();
-	}
-	public function total_load($data){
-		$out='';
-		$out.='<tr>';
-		$out.='<td style="background-color: #6777ef;color: #fff">';
-		$out.=$this->get_total_load_transformer($data)->load_reading;
-		$out.='</td>';
-		$out.='<td style="background-color: #6777ef;color: #fff">';
-		$out.=$this->get_total_load_feeder($data)->load_reading;
-		$out.='</td>';
-		$out.='</tr>';
-		return $out;
-	}
 	public function load_maximum($data){
 		$out='';
 		$out='<tr>
@@ -564,16 +509,15 @@ public function get_total_load_transformer($data){
 		<th rowspan="4">TRX S/S  132/33/11KV T/S</th>
                             <th ></th>
                             
-                            <th colspan="7"><center>MAXIMUM LOAD</center></th>
+                            <th colspan="6"><center>MAXIMUM LOAD</center></th>
                             
                             <td></td>
 </tr>
 <tr>
 
 <th rowspan="3" ><center>NAME</center></th>
-<th rowspan="3" ><center>Type</center></th>
-<th colspan="3"><center>Day Peak(06:00-18:00)</center></th>
-<th colspan="3"><center>Night Peak(19:00-05:00)</center></th>
+<th colspan="3"><center>Day Peak(0.00-17:00)</center></th>
+<th colspan="3"><center>Night Peak(18.00-23:00)</center></th>
 
 <td></td>
 
@@ -582,7 +526,7 @@ public function get_total_load_transformer($data){
 <th>LOAD</th>
 <th>TIME</th>
 <th>DATE</th>
-<th style=" text-align: right;">LOAD</th>
+<th>LOAD</th>
 <th>TIME</th>
 <th>DATE</th>
 <th>MAX LOAD</th>
@@ -602,88 +546,36 @@ public function get_total_load_transformer($data){
 			$nightPeak=$this->get_reading_max(["date"=>$data['date'],"feeder_id"=>$value->assetid,"dt"=>"month","type"=>"load_reading","incommer"=>$value->incommer],$weather="night");
 			$out.="<tr>";
 
-			
+			$out.="<td>";
 			if ($value->incommer==1) {
-				$out.='<td style="background-color: #6777ef;color: #fff">';
 				$out.="<span class='font-weight-bold'>".$value->name."</span>";
-				$out.="</td>";
 			} else {
-				$out.="<td>";
 				$out.=$value->name;
-				$out.="</td>";
 			}
 			
 			
-			
-				if ($value->incommer==1) {
-					$out.='<td style="background-color: #6777ef;color: #fff">';
-				$out.="<span class='font-weight-bold '>Transformer</span>";
-				$out.="</td>";
-			} else {
-				$out.="<td>";
-				$out.="Feeder";
-				$out.="</td>";
-			}
-			
-			if ($value->incommer==1) {
-
-			$out.='<td style="background-color: #6777ef;color: #fff; text-align: right;">';
+			$out.="</td>";
+			$out.="<td>";
 			$out.=(isset($dayPeak)&&!empty($dayPeak))?$dayPeak->load_reading:'-';
 			$out.="</td>";
-		}else{
-			$out.='<td style=" text-align: right;">';
-			$out.=(isset($dayPeak)&&!empty($dayPeak))?$dayPeak->load_reading:'-';
-			$out.="</td>";
-		}
-
-		if ($value->incommer==1) {
-
-			$out.='<td style="background-color: #6777ef;color: #fff">';
+			$out.="<td>";
 			$out.=(isset($dayPeak)&&!empty($dayPeak))?$dayPeak->hour.":00":'-';
 			$out.="</td>";
-		}
-			else{
-				$out.='<td >';
-			$out.=(isset($dayPeak)&&!empty($dayPeak))?$dayPeak->hour.":00":'-';
-			$out.="</td>";
-			}
-			if ($value->incommer==1) {
-			$out.='<td style="background-color: #6777ef;color: #fff">';
+			$out.="<td>";
 			$out.=(isset($dayPeak)&&!empty($dayPeak))?substr($dayPeak->captured_at, 8):'-';
 			$out.="</td>";
-		}else{
-			$out.='<td >';
-			$out.=(isset($dayPeak)&&!empty($dayPeak))?substr($dayPeak->captured_at, 8):'-';
-			$out.="</td>";
-		}
-		if ($value->incommer==1) {
-			$out.='<td style="background-color: #6777ef;color: #fff; text-align: right;">';
-			$out.=(isset($nightPeak)&&!empty($nightPeak))?$nightPeak->load_reading:'-';
-			$out.="</td>";
-		}else{
-			$out.='<td style=" text-align: right;">';
-			$out.=(isset($nightPeak)&&!empty($nightPeak))?$nightPeak->load_reading:'-';
-			$out.="</td>";
-		}
-			if ($value->incommer==1) {
-			$out.='<td style="background-color: #6777ef;color: #fff">';
-			$out.=(isset($nightPeak)&&!empty($nightPeak))?$nightPeak->hour.":00":'-';
-			$out.="</td>";
-		}else{
-			$out.='<td >';
-			$out.=(isset($nightPeak)&&!empty($nightPeak))?$nightPeak->hour.":00":'-';
-			$out.="</td>";
-		}
 
-		if ($value->incommer==1) {
-			$out.='<td style="background-color: #6777ef;color: #fff">';
+
+			$out.="<td>";
+			$out.=(isset($nightPeak)&&!empty($nightPeak))?$nightPeak->load_reading:'-';
+			$out.="</td>";
+			$out.="<td>";
+			$out.=(isset($nightPeak)&&!empty($nightPeak))?$nightPeak->hour.":00":'-';
+			$out.="</td>";
+			$out.="<td>";
 			$out.=(isset($nightPeak)&&!empty($nightPeak))? substr($nightPeak->captured_at, 8):'-';
 			$out.="</td>";
-		}else{
-			$out.='<td >';
-			$out.=(isset($nightPeak)&&!empty($nightPeak))? substr($nightPeak->captured_at, 8):'-';
-			$out.="</td>";
-		}
+
 
 			$out.="<td style='background:#033999;color:#ffffff'>";
 			if (isset($nightPeak)&&!empty($nightPeak)) {
@@ -708,10 +600,10 @@ public function get_total_load_transformer($data){
 	}
 	//COINCINDENTAL LOAD
 
-	private function get_states(){
+	private function get_ibc_goupby_state(){
 		 
-		// $this->db->group_by("state");
-		 return $this->db->get("states")->result();
+		 $this->db->group_by("state");
+		 return $this->db->get("ibc")->result();
 	}
 
 	private function get_transmission_by_state($state){ 
@@ -758,9 +650,9 @@ public function get_total_load_transformer($data){
 		//$array=array();
 		$sumDay=0;
 		$sumNight=0;
-		foreach ($this->get_states() as $key => $state) {
+		foreach ($this->get_ibc_goupby_state() as $key => $ibc) {
 
-			foreach ($this->get_transmission_by_state($state->id) as $key => $transmission) {
+			foreach ($this->get_transmission_by_state($ibc->state) as $key => $transmission) {
 			$dayPeak=$this->getDayorNightPeakByTransmission($data,"day",$transmission->id)->peak;
            	$nightPeak=$this->getDayorNightPeakByTransmission($data,"night",$transmission->id)->peak;
            	$sumDay+=$dayPeak;
@@ -770,8 +662,8 @@ public function get_total_load_transformer($data){
            
             
            }
-            $day[]=["label"=>$state->name,"y"=>$sumDay];
-            $night[]=["label"=>$state->name,"y"=>$sumNight];
+            $day[]=["label"=>$ibc->state,"y"=>$sumDay];
+            $night[]=["label"=>$ibc->state,"y"=>$sumNight];
             $sumDay=0;
             $sumNight=0;
 		}
@@ -804,13 +696,13 @@ public function get_total_load_transformer($data){
             
             $sumDay=0;
             $sumNight=0;
-          foreach ($this->get_states() as $key => $state) {
+          foreach ($this->get_ibc_goupby_state() as $key => $ibc) {
              //$out.="<tr>";
              $out.="<tr>";
-           $out.='<td colspan="4" class="font-weight-bold"><center>'.$state->name .'</center></td>';
+           $out.='<td colspan="4" class="font-weight-bold"><center>'.$ibc->state .'</center></td>';
            $out.='</tr>';
              
-           foreach ($this->get_transmission_by_state($state->id) as $key => $transmission) {
+           foreach ($this->get_transmission_by_state($ibc->state) as $key => $transmission) {
            	$out.='<tr>';
            	$out.='<td class="font-weight-bold">'.$transmission->tsname.'</td>';
           	 
@@ -830,7 +722,7 @@ public function get_total_load_transformer($data){
            	$out.='</tr>';
            }
            $out.='<tr style="background:#6777ef;color:#ffffff" class="font-weight-bold">';
-           $out.='<td colspan="2">SUB TOTAL '.$state->name.'</td>';
+           $out.='<td colspan="2">SUB TOTAL '.$ibc->state.'</td>';
           	$out.='<td>'.$sumDay.'</td>';
            	$out.='<td>'.$sumNight.'</td>';
            $out.='</tr>';
@@ -880,7 +772,7 @@ public function get_total_load_transformer($data){
          $out.='<tbody>';
             for ($hour=0; $hour <=23 ; $hour++) { 
         $out.='<tr><td style="background: #556080;color: #ffffff"><strong>';
-        $out.= $hour==0?'0:00':$hour.':00';
+        $out.= $hour==0?'00':$hour;
         $out.='</strong> </td>';
 
         foreach ($date as $key =>  $day) {
@@ -918,22 +810,11 @@ public function get_total_load_transformer($data){
 	}
 
 	public function feederTransformerByStation($data){
-		
-		if ($data['voltage_level']=="33kv") {
-			$this->db->select('transformers.id as transformer_id,transformers.names_trans,feeders_33kv.*');
+		$this->db->select('transformers.id as transformer_id,transformers.names_trans,feeders.*');
 		$this->db->from('transformers');
-			$this->db->join('feeders_33kv','feeders_33kv.transformer_id=transformers.id',"left",false);
+		$this->db->join('feeders','feeders.transformer_id=transformers.id',"left",false);
 		
-		$this->db->where(['feeders_33kv.station_id'=>$data['station_id']]);
-		} else {
-			$this->db->select('transformers.id as transformer_id,transformers.names_trans,feeders.*');
-		$this->db->from('transformers');
-			$this->db->join('feeders_11kv','feeders_11kv.transformer_id=transformers.id',"left",false);
-		
-		$this->db->where(['feeders_11kv.station_id'=>$data['station_id']]);
-		}
-		
-		
+		$this->db->where(['feeders.voltage_level'=>$data['voltage_level'],'feeders.station_id'=>$data['station_id']]);
 		$query=$this->db->get();
 		//print_r($query->result());
 		return $query->result();
@@ -1343,86 +1224,23 @@ public function get_total_load_transformer($data){
 	}
 
 
-	public function get_all_fault_equipments($data,$zone_id){
-		if ($data['voltage_level']=="33kv") {
-			
-		$this->db->select("equipment_id,category,fd.feeder_name as feeder_name,fault_responses.station_id,fault_responses.transformer_id,fault_responses.voltage_level,fault_responses.created_at,COUNT(equipment_id) as total");
+	public function get_all_fault_equipments($data){
+		$this->db->select("equipment_id,category,transm.tsname as transmission,iss.iss_names as iss_name,trans.names_trans as transformer,fd.feeder_name as feeder_name,transmN.tsname as transmissionN,issN.iss_names as iss_nameN,transfN.names_trans as transformerN,fault_responses.station_id,fault_responses.transformer_id,fault_responses.voltage_level,fault_responses.created_at,COUNT(equipment_id) as total");
 		$this->db->from("fault_responses");
 		$this->db->group_by('equipment_id');
 
-		
-		$this->db->join("feeders_33kv fd","fault_responses.equipment_id=fd.id and fault_responses.category='Feeder' ");
-		 $this->db->join(" transmissions transmN","fd.station_id=transmN.id");
-		 $this->db->join(" zones zn","zn.id=transmN.zone_id and zn.id=$zone_id");
-		
+		$this->db->join("transmissions transm","fault_responses.equipment_id=transm.id and fault_responses.category='Transmission station'", 'left',FALSE);
+		$this->db->join("iss_tables iss","fault_responses.equipment_id=iss.id and fault_responses.category='Injection substation'", 'left',FALSE);
+		$this->db->join("transformers trans","fault_responses.equipment_id=trans.id and fault_responses.category='Transformer'", 'left',FALSE);
+		$this->db->join("feeders fd","fault_responses.equipment_id=fd.id and fault_responses.category='Feeder' ", 'left',FALSE);
+		 $this->db->join(" transmissions transmN","fault_responses.station_id=transmN.id and fault_responses.voltage_level='33kv'", 'left',FALSE);
+		 $this->db->join(" transformers transfN","fault_responses.transformer_id=transfN.id and fault_responses.transformer_id !='' ", 'left',FALSE);
+		 $this->db->join(" iss_tables issN","fault_responses.station_id=issN.id and fault_responses.voltage_level !='33kv' ", 'left',FALSE);
 
-		  $this->db->where(array('MONTH(fault_responses.created_at)'=>$data['month'],'YEAR(fault_responses.created_at)'=>$data['year'],"fault_responses.voltage_level"=>$data['voltage_level']));
+		  $this->db->where(array('MONTH(fault_responses.created_at)'=>$data['month'],'YEAR(fault_responses.created_at)'=>$data['year']));
 		$this->db->order_by('fault_responses.id','DESC');
 		$query=$this->db->get();
-		//var_dump($query->result());
 		return $query->result();
-		} else {
-			//11kv
-
-		$this->db->select("equipment_id,category,fd.feeder_name as feeder_name,fault_responses.station_id,fault_responses.transformer_id,fault_responses.voltage_level,fault_responses.created_at,COUNT(equipment_id) as total");
-		$this->db->from("fault_responses");
-		$this->db->group_by('equipment_id');
-
-		
-		$this->db->join("feeders_11kv fd","fault_responses.equipment_id=fd.id and fault_responses.category='Feeder' ");
-		 $this->db->join(" feeder33kv_iss feeder_iss","fd.station_id=feeder_iss.iss_id");
-		 $this->db->join(" zones zn","zn.id=feeder_iss.zone_id and zn.id=$zone_id");
-		
-
-		  $this->db->where(array('MONTH(fault_responses.created_at)'=>$data['month'],'YEAR(fault_responses.created_at)'=>$data['year'],"fault_responses.voltage_level"=>$data['voltage_level']));
-		$this->db->order_by('fault_responses.id','DESC');
-		$query=$this->db->get();
-		//var_dump($query->result());
-		return $query->result();
-			
-		}
-		
-
-	}
-	public function get_all_fault_feeder_hourly_reading($data,$zone_id){
-		if ($data['voltage_level']=="33kv") {
-			
-		$this->db->select("log_sheet.feeder_id,fd.feeder_name as feeder_name,log_sheet.station_id,log_sheet.transformer_id,log_sheet.voltage_level,log_sheet.captured_at,COUNT(feeder_id) as total");
-		$this->db->from("log_sheet");
-		$this->db->group_by('log_sheet.feeder_id');
-
-		
-		$this->db->join("feeders_33kv fd","log_sheet.feeder_id=fd.id and log_sheet.voltage_level='33kv' ");
-		 $this->db->join(" transmissions transmN","fd.station_id=transmN.id");
-		 $this->db->join(" zones zn","zn.id=transmN.zone_id and zn.id=$zone_id");
-		
-
-		  $this->db->where(array('MONTH(log_sheet.captured_at)'=>$data['month'],'YEAR(log_sheet.captured_at)'=>$data['year'],"log_sheet.voltage_level"=>$data['voltage_level']));
-		$this->db->order_by('log_sheet.id','DESC');
-		$query=$this->db->get();
-		//var_dump($query->result());
-		return $query->result();
-		} else {
-			//11kv
-
-		$this->db->select("log_sheet.feeder_id,fd.feeder_name as feeder_name,log_sheet.station_id,log_sheet.transformer_id,log_sheet.voltage_level,log_sheet.captured_at,COUNT(feeder_id) as total");
-		$this->db->from("log_sheet");
-		$this->db->group_by('log_sheet.feeder_id');
-
-		
-		$this->db->join("feeders_11kv fd","log_sheet.feeder_id=fd.id and log_sheet.voltage_level='11kv' ");
-		 $this->db->join(" feeder33kv_iss feeder_iss","fd.station_id=feeder_iss.iss_id");
-		 $this->db->join(" zones zn","zn.id=feeder_iss.zone_id and zn.id=$zone_id");
-		
-
-		  $this->db->where(array('MONTH(log_sheet.created_at)'=>$data['month'],'YEAR(log_sheet.created_at)'=>$data['year'],"log_sheet.voltage_level"=>$data['voltage_level']));
-		$this->db->order_by('log_sheet.id','DESC');
-		$query=$this->db->get();
-		//var_dump($query->result());
-		return $query->result();
-			
-		}
-		
 
 	}
 
@@ -1450,60 +1268,6 @@ public function get_total_load_transformer($data){
 // 	}
 
 
-
-	public function get_zones(){
-		$query=$this->db->get("zones");
-		return $query->result();
-	}
-	public function get_programme_sheet($input){
-		//var_dump($data);
-		$data='<thead><tr>';
-		$data.='<th style="border:1px solid #000;color:#000;background-color:#ddd;font-weight:bold">ZONE</th>';
-		$data.='<th style="border:1px solid #ddd;color:#000;background-color:#e5e5e5;font-weight:bold">FEEDER</th>';
-		foreach ($this->get_cause_fault() as $key => $indx) {
-			$data.='<th ><div>';
-			$data.=$indx->name;
-			$data.='</div></th>';
-		}
-
-		$data.='</tr></thead><tbody>';
-		//get zones
-		foreach ($this->get_zones() as $key => $zone) {
-			//var_dump($this->get_all_fault_equipments($input,$zone->id));
-			$data.='<tr>';
-			$data.='<tr>';
-			$count=count($this->get_all_fault_equipments($input,$zone->id))+1;
-			$data.='<td style="border:1px solid #000;color:#000;background-color:#ddd;font-weight:bold" rowspan="'. $count .'">';
-			$data.=$zone->name;
-              $data.='</td>';
-              $data.='</tr>';
-		
-		foreach ($this->get_all_fault_equipments($input,$zone->id) as $key => $asset) {
-			//$data.='<tr>';
-			$data.='<td style="border:1px solid #ddd;color:#000;background-color:#e5e5e5;font-weight:bold">';
-			$data.=$asset->feeder_name;
-              $data.='</td>';
-			
-			foreach ($this->get_cause_fault() as $key => $indx) {
-				$data.='<td>';
-//fault_id,$equipment_id,$date,$countX
-				//get the number of fault_indxs for a feeder
-				$count=$this->count_asset_fault($indx->id,$asset->equipment_id,$input['date'],"cause")->num;
-				if ($count>0) {
-					$data.='<span class="text-success font-weight-bold ">'.$count.'</span>';
-				} else {
-					$data.=$count;
-				}
-				
-				$data.='</td>';
-			}
-			$data.='</tr>';	
-		}
-	}
-		$data.='</tbody>';
-
-		return $data;
-	}
 
 	//summary report
 	public function get_fault_report($data){
@@ -1584,6 +1348,10 @@ public function get_total_load_transformer($data){
 				$this->db->join(" iss_tables issN","fault_responses.station_id=issN.id and fault_responses.voltage_level !='33kv' ", 'left',FALSE);
 				$this->db->join("iss_tables iss","fault_responses.equipment_id=iss.id and fault_responses.category='Injection substation'", 'left',FALSE);
 			}
+			
+			
+			
+
 				}
 		
 		$this->db->join("transformers trans","fault_responses.equipment_id=trans.id and fault_responses.category='Transformer'", 'left',FALSE);
@@ -1606,6 +1374,80 @@ public function get_total_load_transformer($data){
 		return $query->result();
 	}
 
+	// public function get_assets($type,$asset_name){
+	// 	switch ($type) {
+	// 		case 'TS':
+	// 			if ($asset_name=="") {
+	// 				$this->db->select("tsname as name");
+	// 				$this->db->from("transmission_stations");
+	// 			}else{
+	// 				$this->db->distinct();
+	// 				$this->db->select("asset_name as name");
+					
+	// 				$this->db->from("trippings");
+	// 				$this->db->where("asset_name",$asset_name);
+	// 			}
+	// 			break;
+	// 		case 'ISS':
+	// 			if ($asset_name=="") {
+	// 				$this->db->distinct("ISS");
+	// 				$this->db->select("ISS as name");
+	// 				$this->db->from("feeder_hiarachy");
+	// 			}else{
+	// 				$this->db->distinct();
+	// 				$this->db->select("asset_name as name");
+					
+	// 				$this->db->from("trippings");
+	// 				$this->db->where("asset_name",$asset_name);
+	// 			}
+				
+	// 			break;
+	// 		case 'feeder_11':
+	// 			if ($asset_name=="") {
+	// 				$this->db->distinct("feeder_id");
+	// 				$this->db->select("feeder_id as name");
+	// 				$this->db->from("feeder_stations");
+	// 				$this->db->where("station_type","ISS");
+	// 			}else{
+	// 				$this->db->distinct();	
+	// 				$this->db->select("asset_name as name");	
+	// 				$this->db->from("trippings");
+	// 				$this->db->where("asset_name",$asset_name);
+	// 			}
+	// 			break;
+	// 		case 'feeder_33':
+	// 			if ($asset_name=="") {
+	// 				$this->db->distinct("feeder_id");
+	// 				$this->db->select("feeder_id as name");
+	// 				$this->db->from("feeder_stations");
+	// 				$this->db->where("station_type","TS");
+	// 			}else{
+	// 				$this->db->distinct();	
+	// 				$this->db->select("asset_name as name");	
+	// 				$this->db->from("trippings");
+	// 				$this->db->where("asset_name",$asset_name);
+	// 			}
+	// 			break;
+	// 		case 'dtr':
+	// 			if ($asset_name=="") {
+	// 				$this->db->select("transformer_name as name");
+	// 				$this->db->from("dtr_records");
+					
+	// 			}else{
+	// 				$this->db->distinct();	
+	// 				$this->db->select("asset_name as name");	
+	// 				$this->db->from("trippings");
+	// 				$this->db->where("asset_name",$asset_name);
+	// 			}
+	// 			break;
+	// 		default:
+	// 			# code...
+	// 			break;
+	// 	}
+	// 	$query=$this->db->get();
+	// 	return $query->result();
+		
+	// }
 
 	public function count_asset_fault($fault_id,$equipment_id,$date,$countX){
 		list($month,$year)=$this->substr_date($date);
@@ -1620,55 +1462,148 @@ public function get_total_load_transformer($data){
 		
 		return $this->db->get()->row();
 	}
-	public function count_interruption_fault($status,$feeder_id,$date,$countX){
-		list($month,$year)=$this->substr_date($date);
-		$this->db->select('COUNT(feeder_id) as num');
-		$this->db->from("log_sheet");
-		
-		$this->db->where(array('status'=>$status,'feeder_id'=>$feeder_id,'MONTH(captured_at) '=>$month,'YEAR(captured_at) '=>$year ));
-		
-		return $this->db->get()->row();
-	}
 
-	
-
-	public function get_fault_indication_frequency($input){
+	public function get_fault_cause_frequency($input){
 		//var_dump($data);
 		$data='<thead><tr>';
-		$data.='<th style="border:1px solid #000">ZONE</th>';
-		$data.='<th>FEEDER</th>';
-		foreach ($this->get_feeder_status() as $key => $indx) {
+		$data.='<th style="">FEEDER</th>';
+		foreach ($this->get_cause_fault() as $key => $cause) {
 			$data.='<th><div>';
-			$data.=$indx->names;
+			$data.=$cause->name;
 			$data.='</div></th>';
 		}
 
+
 		$data.='</tr></thead><tbody>';
-		foreach ($this->get_zones() as $key => $zone) {
-			//var_dump($this->get_all_fault_equipments($input,$zone->id));
+		//get feeders
+		foreach ($this->get_all_fault_equipments($input) as $key => $asset) {
 			$data.='<tr>';
-			$data.='<tr>';
-			$count=count($this->get_all_fault_feeder_hourly_reading($input,$zone->id))+1;
-			$data.='<td style="border:1px solid #000;color:#000;background-color:#ddd;font-weight:bold" rowspan="'. $count .'">';
-			$data.=$zone->name;
-              $data.='</td>';
-              $data.='</tr>';
-		foreach ($this->get_all_fault_feeder_hourly_reading($input,$zone->id) as $key => $asset) {
-			$data.='<tr>';
-			$data.='<td style="border:1px solid #ddd;color:#000;background-color:#e5e5e5;font-weight:bold">';
-			$data.=$asset->feeder_name;
+			$data.='<td>';
+			if ($asset->category=="Transmission station") {
+                        $data.= $asset->transmission;
+                      }elseif ($asset->category=="Injection substation") {
+                        $data.= $asset->iss_name;
+                      }elseif ($asset->category=="Transformer") {
+                        if ($asset->voltage_level=="33kv") {
+                           $data.= $asset->transmissionN." > <span class='text-info'>".$asset->transformer."</span>";
+                        }else{
+                          $data.= $asset->iss_nameN." > <span class='text-info'>".$asset->transformer."</span>";
+                        }
+                       
+                      }elseif ($asset->category=="Feeder") {
+                        if ($asset->voltage_level=="33kv") {
+                           $data.= $asset->transmissionN." > ".$asset->transformerN." >  <span class='text-info'>".$asset->feeder_name."</span>";
+                        }else{
+                           $data.= $asset->iss_nameN." > ".$asset->transformerN." >  <span class='text-info'>".$asset->feeder_name."</span>";
+                        }
+                      }
               $data.='</td>';
 			
-			foreach ($this->get_feeder_status() as $key => $indx) {
+			foreach ($this->get_cause_fault() as $key => $cause) {
 				$data.='<td>';
-//fault_id,$equipment_id,$date,$countX
-				//get the number of fault_indxs for a feeder
-				$data.=$this->count_interruption_fault($indx->abbr,$asset->feeder_id,$input['date'],"indication")->num;
+				//get the number of fault_causes for a feeder
+				$data.=$this->count_asset_fault($cause->id,$asset->equipment_id,$input['date'],"cause")->num;
 				$data.='</td>';
 			}
 			$data.='</tr>';	
 		}
+		$data.='</tbody>';
+
+		return $data;
 	}
+
+	public function get_programme_sheet($input){
+		//var_dump($data);
+		$data='<thead><tr>';
+		$data.='<th>FEEDER</th>';
+		foreach ($this->get_cause_fault() as $key => $indx) {
+			$data.='<th><div>';
+			$data.=$indx->name;
+			$data.='</div></th>';
+		}
+
+		$data.='</tr></thead><tbody>';
+		//get feeders
+		foreach ($this->get_all_fault_equipments($input) as $key => $asset) {
+			$data.='<tr>';
+			$data.='<td>';
+			if ($asset->category=="Transmission station") {
+                        $data.= $asset->transmission;
+                      }elseif ($asset->category=="Injection substation") {
+                        $data.= $asset->iss_name;
+                      }elseif ($asset->category=="Transformer") {
+                        if ($asset->voltage_level=="33kv") {
+                           $data.= $asset->transmissionN." > <span class='text-info'>".$asset->transformer."</span>";
+                        }else{
+                          $data.= $asset->iss_nameN." > <span class='text-info'>".$asset->transformer."</span>";
+                        }
+                       
+                      }elseif ($asset->category=="Feeder") {
+                        if ($asset->voltage_level=="33kv") {
+                           $data.= $asset->transmissionN." > ".$asset->transformerN." >  <span class='text-info'>".$asset->feeder_name."</span>";
+                        }else{
+                           $data.= $asset->iss_nameN." > ".$asset->transformerN." >  <span class='text-info'>".$asset->feeder_name."</span>";
+                        }
+                      }
+              $data.='</td>';
+			
+			foreach ($this->get_fault_indicators() as $key => $indx) {
+				$data.='<td>';
+//fault_id,$equipment_id,$date,$countX
+				//get the number of fault_indxs for a feeder
+				$data.=$this->count_asset_fault($indx->id,$asset->equipment_id,$input['date'],"indication")->num;
+				$data.='</td>';
+			}
+			$data.='</tr>';	
+		}
+		$data.='</tbody>';
+
+		return $data;
+	}
+	public function get_fault_indication_frequency($input){
+		//var_dump($data);
+		$data='<thead><tr>';
+		$data.='<th>FEEDER</th>';
+		foreach ($this->get_fault_indicators() as $key => $indx) {
+			$data.='<th><div>';
+			$data.=$indx->indicator;
+			$data.='</div></th>';
+		}
+
+		$data.='</tr></thead><tbody>';
+		//get feeders
+		foreach ($this->get_all_fault_equipments($input) as $key => $asset) {
+			$data.='<tr>';
+			$data.='<td>';
+			if ($asset->category=="Transmission station") {
+                        $data.= $asset->transmission;
+                      }elseif ($asset->category=="Injection substation") {
+                        $data.= $asset->iss_name;
+                      }elseif ($asset->category=="Transformer") {
+                        if ($asset->voltage_level=="33kv") {
+                           $data.= $asset->transmissionN." > <span class='text-info'>".$asset->transformer."</span>";
+                        }else{
+                          $data.= $asset->iss_nameN." > <span class='text-info'>".$asset->transformer."</span>";
+                        }
+                       
+                      }elseif ($asset->category=="Feeder") {
+                        if ($asset->voltage_level=="33kv") {
+                           $data.= $asset->transmissionN." > ".$asset->transformerN." >  <span class='text-info'>".$asset->feeder_name."</span>";
+                        }else{
+                           $data.= $asset->iss_nameN." > ".$asset->transformerN." >  <span class='text-info'>".$asset->feeder_name."</span>";
+                        }
+                      }
+              $data.='</td>';
+			
+			foreach ($this->get_fault_indicators() as $key => $indx) {
+				$data.='<td>';
+//fault_id,$equipment_id,$date,$countX
+				//get the number of fault_indxs for a feeder
+				$data.=$this->count_asset_fault($indx->id,$asset->equipment_id,$input['date'],"indication")->num;
+				$data.='</td>';
+			}
+			$data.='</tr>';	
+		}
 		$data.='</tbody>';
 
 		return $data;

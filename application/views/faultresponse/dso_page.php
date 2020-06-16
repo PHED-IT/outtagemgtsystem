@@ -4,6 +4,7 @@
                   <h4>DSO Fault/Rapid Response</h4>
                   <div class="card-header-action">
                        <a class="btn btn-sm btn-outline-primary justify-content-end" style="" href="<?= base_url('FaultResponse/outage_form') ?>"><i class="fa fa-plus"></i> New Request</a>
+                       <a class="btn btn-sm btn-outline-success justify-content-end" style="" href="<?= base_url('mis/fault_report') ?>"><i class="fa fa-book"></i> Fault Report</a>
                     </div>
                 </div>
                       
@@ -22,7 +23,7 @@
                       <th>Indicator</th>
                       <th>Entry Date</th>
                      <th>Date/Time Occurred</th>
-                      <th>Est. Duration</th>
+                      <th>Load Loss</th>
                     
                       <th></th>                             
                   </tr>
@@ -48,9 +49,9 @@
                        
                       }elseif ($outage->category=="Feeder") {
                         if ($outage->voltage_level=="33kv") {
-                           echo $outage->transmissionN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder_name."</span>";
+                           echo $outage->transmissionN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder11_name."</span>";
                         }else{
-                           echo $outage->iss_nameN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder_name."</span>";
+                           echo $outage->iss_nameN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder11_name."</span>";
                         }
                       }
                     ?>
@@ -76,7 +77,7 @@
                   <td><?= $outage->indicator; ?></td>
                   <td class="td"><?= date("d-M-Y h:i a",strtotime($outage->created_at)); ?></td>
                   <td class="td"><?= date("d-M-Y h:i a",strtotime($outage->outage_date)); ?></td>
-                  <td><?= $outage->duration; ?> min.</td>
+                  <td><?= $outage->load_loss; ?> </td>
                               
                   <td>
 

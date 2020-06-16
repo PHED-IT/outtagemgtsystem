@@ -15,9 +15,19 @@ class Input extends My_Controller
 		
 		// $data['ts_data']=$this->input_model->get_transmissions();
 		// $data['iss_data']=$this->input_model->get_iss();
-		$data['user']=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+		$data['user']=$user;
+		//check if user is a dso or transmission dso
+		if ($user->role_id==8) {
+			#dso
+			$data['station']=$this->input_model->get_station($user);
+		} elseif($user->role_id==35) {
+			# transminssion dso
+			$data['station']=$this->input_model->get_transmission_by_user($user);
+		}
 		
-		$data['station']=$this->input_model->get_station($data['user']);
+		
+		
 		//$data['feeders']=$this->input_model->get_feeder_station($data['user']);
 		//$data['last_reading']=$this->input_model->get_last_reading(array("user_id"=>$this->session->userdata('USER_ID'),"type"=>"log"));
 		$data['title']="Log entry sheet";
@@ -95,8 +105,16 @@ class Input extends My_Controller
 		// $data['ts_data']=$this->input_model->get_transmissions();
 		// $data['iss_data']=$this->input_model->get_iss();
 
-		$data['user']=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-		$data['station']=$this->input_model->get_station($data['user']);
+		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+		$data['user']=$user;
+		//check if user is a dso or transmission dso
+		if ($user->role_id==8) {
+			#dso
+			$data['station']=$this->input_model->get_station($user);
+		} elseif($user->role_id==35) {
+			# transminssion dso
+			$data['station']=$this->input_model->get_transmission_by_user($user);
+		}
 		//$data['last_reading']=$this->input_model->get_last_reading(array("user_id"=>$this->session->userdata('USER_ID'),"type"=>"energy"));
 		//$data['station']=$this->input_model->get_station($data['user']);
 		//$data['feeders']=$this->input_model->get_feeder_station($data['user']);
@@ -110,7 +128,8 @@ class Input extends My_Controller
 	}
 
 
-	//this fnction get feeder by transformer id
+	
+	//this fnction get 33kv feeder by transformer id
 	public function get_feeders_ts(){
 		//var_dump($this->input->post('logType'));
 		$trans_st=$this->input->post('trans_st');
@@ -301,9 +320,16 @@ class Input extends My_Controller
 		$this->form_validation->set_rules('log_type','LOG TYPE',"required");
 		if ($this->form_validation->run()==FALSE){
 			$data['title']="Edit Log";
-			$data['user']=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-			//this gets users station(transmision or injection sub station)
-			$data['station']=$this->input_model->get_station($data['user']);
+			$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+		$data['user']=$user;
+		//check if user is a dso or transmission dso
+		if ($user->role_id==8) {
+			#dso
+			$data['station']=$this->input_model->get_station($user);
+		} elseif($user->role_id==35) {
+			# transminssion dso
+			$data['station']=$this->input_model->get_transmission_by_user($user);
+		}
 			//$data['feeders']=$this->input_model->get_feeders();
 			$this->load->view('Layouts/header',$data);
 			$this->load->view('inputs/edit_log_sheet',$data);
@@ -312,8 +338,16 @@ class Input extends My_Controller
 			$date=$this->input->post('captured_date');
 			$log_type=$this->input->post('log_type');
 			
-			$data['user']=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-			$data['station']=$this->input_model->get_station($data['user']);
+			$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+		$data['user']=$user;
+		//check if user is a dso or transmission dso
+		if ($user->role_id==8) {
+			#dso
+			$data['station']=$this->input_model->get_station($user);
+		} elseif($user->role_id==35) {
+			# transminssion dso
+			$data['station']=$this->input_model->get_transmission_by_user($user);
+		}
 			
 			$insert_data=array("feeder_id"=>$this->input->post('feeders'),"date"=>$this->input->post('captured_date'),"log_type"=>$this->input->post('log_type'));
 			$month=substr($date, 0,2);

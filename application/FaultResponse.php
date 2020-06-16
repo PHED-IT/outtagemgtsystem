@@ -216,7 +216,6 @@ class FaultResponse extends MY_Controller
 	}
 
 	public function store_fault_response_request(){
-		//var_dump($this->input->post("department"));
 		$department=$this->input->post("department");
 		//asset name can be Transmission station or injection sub station
 		if ($this->input->post('asset_name')=="TS") {
@@ -293,7 +292,7 @@ class FaultResponse extends MY_Controller
 			}else{
 				$response="Rapid";
 			}
-			$outage_id='NOMS'.substr($this->uniqueId(),0,5);
+			$outage_id=$this->uniqueId();
 			$insert_data=array("station_id"=>$station_id,"transformer_id"=>$transformer,"feeder_id"=>$this->input->post('feeder_id'),'remarks'=>trim($this->input->post('remarks')),'voltage_level'=>$voltage_level,"created_by"=>$this->session->userdata('USER_ID'),"outage_id"=>$outage_id,"status_message"=>$status_message,"status"=>$status,"type_response"=>$this->input->post("type_response"),"reason_id"=>$this->input->post("reason_id"),"duration"=>$this->input->post("duration"),"department"=>$department,"outage_date"=>$this->input->post("outage_date"),"transmission_fault"=>$this->input->post("transmission_fault"),"category"=>$category,"equipment_id"=>$equipment,"end_date"=>$end_date,"load_loss"=>$this->input->post('load_loss'));
 			//var_dump($insert_data);
 
@@ -355,7 +354,7 @@ class FaultResponse extends MY_Controller
 					$hso=$this->admin_model->get_users_by_role(11);
 
 
-					$message="Hello, FAULT ID:".$outage->outage_id.".  
+					$message="Hello, FAULT ID:".$outage->outage_id.". 
 A fault (type of fault) has just be logged against ".$item." on ".$outage->outage_date.". Please mobilise for resolution immediately. For more info, call the Dispatch Team on 
 ".$corrd_dispatch[0]->phone;
 
@@ -411,77 +410,13 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 							$this->job_model->addToJob($dataX);
 							//$this->sendSMS(array("phone"=>implode(',', $sms_users),"message"=>$message));
 						}
-
-						//get the enumeration code.. per asset
-						$assetId="";
-						$assetType="";
-						if ($category=="Feeder") {
-							if ($voltage_level=="33kv") {
-								var_dump($outage);
-								
-								if (null!==$this->admin_model->get_feeder33kv_by_id($outage->equipment_id)) {
-									$assetId=$this->admin_model->get_feeder33kv_by_id($outage->equipment_id)->enum_id;
-									$assetType="FEEDER33ID";
-								} else {
-									$assetId="";
-								}
-								
-								//$assetId=($assetId==0)?"":$assetId;
-								
-							}else {
-							# 11kv
-								if (null !==$this->admin_model->get_feeder11kv_by_id($outage->equipment_id)) {
-									$assetId=$this->admin_model->get_feeder11kv_by_id($outage->equipment_id)->enum_id;
-									$assetType="FEEDER11ID";
-								} else {
-									$assetId="";
-								}
-								
-							
-							$assetId=($assetId==0)?"":$assetId;
-							//$assetType="FEEDER11ID";
-						}
-						} elseif ($category=="Transformer") {
-							$assetType="INJID";
-							
-						}elseif ($category="Injection substation") {
-							# iss
-							$assetType="DTRID";
-						}else{
-							//transmission
-						}
-						
-
-					echo json_encode(["status"=>true,"outage_id"=>$outage_id,"assetId"=>$assetId,"voltage_level"=>$outage->voltage_level,"category"=>$outage->category,"assetType"=>$assetType]);	
+					echo json_encode(["status"=>true,"outage_id"=>$outage_id]);	
 			} else {
 				echo json_encode($result);
 			}
 	}
 
 	
-
-	public function store_customers_contact(){
-		$outage_id=$this->input->post("outage_id");
-		var_dump($outage_id);
-		$outage=$this->FaultResponse_model->get_outage($outage_id);
-		$item=$this->getEquipmentName($outage->category,$outage->equipment_id);
-
-		$message='Hello '.$outage_id.' An unplanned outage  has just be noted against '.$item.' powering your premise on '.$outage->outage_date.'. Kindly note that efforts are already on to resolve it. Regards. PHED Dispatch Team';
-		$response=json_decode($this->input->post("records"));
-		//var_dump($response);
-		$dataX=array();
-		foreach ($response as $key => $value) {
-			if (!is_null($value->CON_MOBILENO)) {
-				array_push($dataX, ["email"=>(!is_null($value->CON_EMAILID))?$value->CON_EMAILID:"example@gmail.com","phone"=>(strlen($value->CON_MOBILENO)==10)?'0'.$value->CON_MOBILENO:$value->CON_MOBILENO,"message"=>$message,"subject"=>"PHED NOTIFICATION","status"=>"pending","name"=>$value->CONS_NAME]);	
-			}
-		}
-		//var_dump($dataX);
-		if(count($dataX)>0){
-			$this->job_model->addToJob($dataX);	
-		}
-		 echo json_encode(["status"=>true]);
-
-	}
 	//dso or dispatch upload docx and acknowledge
 	public function acknowled_fault_resp_dso(){
 		$dataX=array();

@@ -37,7 +37,14 @@ class Input_model extends CI_Model
 	public function get_feeders_ts($ts_id){
 		$this->db->select(array('feeder_name','id'));
 		$this->db->where(array("transformer_id"=>$ts_id,"voltage_level"=>"33kv"));
-		$query=$this->db->get("feeders");
+		$query=$this->db->get("feeders_33kv");
+		return $query->result();
+	}
+	//get 33kv feeders by transformer id and voltage level
+	public function get_33kvfeeders(){
+		//$this->db->select(array('feeder_name','id'));
+		//$this->db->where(array("transformer_id"=>$ts_id,"voltage_level"=>"33kv"));
+		$query=$this->db->get("feeders_33kv");
 		return $query->result();
 	}
 
@@ -45,7 +52,7 @@ class Input_model extends CI_Model
 	public function get_feeder_iss($transformer_id){
 		$this->db->select(array('feeder_name','id'));
 		$this->db->where(array('transformer_id'=>$transformer_id,"voltage_level"=>"11kv"));
-		$query=$this->db->get("feeders");
+		$query=$this->db->get("feeders_11kv");
 		return $query->result();
 	}
 	// public function get_transformer_ts($transformer_id){
@@ -510,7 +517,7 @@ class Input_model extends CI_Model
 				# check if previous energy is greater than current energy
 				if($record->energy>$energy){
 					$name=($isIncommer==0)?$this->getFeeder($feeder)->feeder_name:"Incommer";
-					return ['status'=>false,"data"=>"Oops! Energy must not be less than  previous reading({$record->energy}) for ".$name];
+				//	return ['status'=>false,"data"=>"Oops! Energy must not be less than  previous reading({$record->energy}) for ".$name];
 				}
 			}
 			
@@ -1018,7 +1025,7 @@ class Input_model extends CI_Model
 	}
 	//get tra
 	public function get_transmission_id($ts_id){
-		$this->db->select('tsname');
+		$this->db->select(['tsname','id']);
 		$this->db->where('id',$ts_id);
 		$query=$this->db->get($this->transmission_table);
 		return $query->row();
@@ -1026,8 +1033,13 @@ class Input_model extends CI_Model
 
 	//get injection substation for a user
 	public function get_station($user){
-		
 		return $this->get_iss_id($user->iss);
+	}
+
+	//get transmission station by user
+	public function get_transmission_by_user($user){
+
+		return $this->get_transmission_id($user->transmission_id);
 		
 	}
 

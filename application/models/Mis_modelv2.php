@@ -82,30 +82,6 @@ class Mis_model extends CI_Model
 		// $dif=$this->get_reading_first-
 		
 	}
-
-	public function get_feeders_by_zone_voltage($data){
-		if ($data['voltage_level']=="33kv") {
-			$this->db->select("feeders_33kv.*,transmissions.zone_id ");
-		$this->db->from("transmissions");
-		$this->db->join("fault_responses ","fault_responses.station_id=transmissions.id and fault_responses.voltage_level='33kv'");
-		$this->db->join("zones ","zones.id=transmissions.zone_id");
-		$this->db->join("feeders_33kv ","feeders_33kv.id=fault_responses.equipment_id");
-		$this->db->where(["zones.id"=>$data['zone_id'],'fault_responses.date_closed'=>null]);
-		$this->db->group_by("fault_responses.equipment_id");
-		$query=$this->db->get();
-		return $query->result();
-		}else{
-			//11kv violage
-			$this->db->select("feeders_11kv.*,feeder33kv_iss.zone_id ");
-		$this->db->from("feeder33kv_iss");
-		$this->db->join("fault_responses ","fault_responses.station_id=feeder33kv_iss.iss_id and voltage_level='11kv'");
-		$this->db->join("feeders_11kv ","feeders_11kv.id=fault_responses.equipment_id");
-		$this->db->where(["feeder33kv_iss.zone_id"=>$data['zone_id'],'fault_responses.date_closed'=>null]);
-		$this->db->group_by("fault_responses.equipment_id");
-		$query=$this->db->get();
-		return $query->result();
-		}
-	}
 		public function get_energy_consumption_log_sheet($data){
 		//var_dump($data);
 		 list($month,$year)=$this->substr_date($data['date']);
@@ -169,7 +145,7 @@ class Mis_model extends CI_Model
 			if ($weather=="day") {
 				if (isset($data['incommer'])) {
 					$incommer=$data['incommer'];
-				$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=6 AND hour<=18)");
+				$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=0 AND hour<=17)");
 				} else {
 					//feeder
 				$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}'  and feeder_id='".$data['feeder_id']."' AND hour >=0 AND hour<=17)");
@@ -180,7 +156,7 @@ class Mis_model extends CI_Model
 			}elseif ($weather=="night") {
 				if (isset($data['incommer'])) {
 					$incommer=$data['incommer'];
-					$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=5 AND hour<=19)");
+					$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and isIncommer=$incommer and feeder_id='".$data['feeder_id']."' AND hour >=18 AND hour<=23)");
 				} else {
 					# feeder
 			$this->db->where("{$type}=(SELECT MAX({$type}) from log_sheet where MONTH(captured_at)='{$month}' AND YEAR(captured_at)='{$year}' and feeder_id='".$data['feeder_id']."' AND hour >=18 AND hour<=23)");
@@ -572,8 +548,8 @@ public function get_total_load_transformer($data){
 
 <th rowspan="3" ><center>NAME</center></th>
 <th rowspan="3" ><center>Type</center></th>
-<th colspan="3"><center>Day Peak(06:00-18:00)</center></th>
-<th colspan="3"><center>Night Peak(19:00-05:00)</center></th>
+<th colspan="3"><center>Day Peak(0.00-17:00)</center></th>
+<th colspan="3"><center>Night Peak(18.00-23:00)</center></th>
 
 <td></td>
 
@@ -880,7 +856,7 @@ public function get_total_load_transformer($data){
          $out.='<tbody>';
             for ($hour=0; $hour <=23 ; $hour++) { 
         $out.='<tr><td style="background: #556080;color: #ffffff"><strong>';
-        $out.= $hour==0?'0:00':$hour.':00';
+        $out.= $hour==0?'00':$hour;
         $out.='</strong> </td>';
 
         foreach ($date as $key =>  $day) {
@@ -1584,6 +1560,10 @@ public function get_total_load_transformer($data){
 				$this->db->join(" iss_tables issN","fault_responses.station_id=issN.id and fault_responses.voltage_level !='33kv' ", 'left',FALSE);
 				$this->db->join("iss_tables iss","fault_responses.equipment_id=iss.id and fault_responses.category='Injection substation'", 'left',FALSE);
 			}
+			
+			
+			
+
 				}
 		
 		$this->db->join("transformers trans","fault_responses.equipment_id=trans.id and fault_responses.category='Transformer'", 'left',FALSE);

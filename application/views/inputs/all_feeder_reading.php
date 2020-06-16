@@ -50,7 +50,7 @@
                 <div class="form-group">
               <label>.</label>
               <div class=" ml-md-auto btn-list">
-               <button  class="btn btn-primary form-control" type="submit">Show Log</button>
+               <button  class="btn btn-primary form-control" id="show_report_click" type="submit">Show Log</button>
                                                         
               </div>
                                                 
@@ -66,7 +66,7 @@
                     
             
                     </fieldset>
-                            
+                            <center><div class="alert alert-info" id="show_report_click_div" style="display: none;"><span class="fa fa-spinner fa-spin"></span> Wait report is loading... </div></center> 
                             <?php
            // var_dump($station_id);
               if (isset($feeders) ) {

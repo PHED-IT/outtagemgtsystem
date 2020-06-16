@@ -59,25 +59,27 @@
              <?php
              if (isset($max->load_reading) && $feeder_wise) {
              ?>
+             
             <h6 style="padding: 5px">
             <strong>
-            <span class="text-info">Avg:</span><?= (isset($average))?round($average->load_reading,2):"0" ?> | 
-            <span class="text-info">Min. Load(MW): </span><?= $min->load_reading;?><?= ($dt=="month")? (" <span class='text-info'> Day: </span> ".date("d/m/Y",strtotime($min->captured_at)).' Hour: '.$min->hour.':00'):" <span class='text-info'>Hour:</span> ".$min->hour.'.00' ?>  |
-              <span class="text-info">Max. Load(MW): </span><?= $max->load_reading;?><?= ($dt=="month")? (" <span class='text-info'> Day: </span> ".date("d/m/Y",strtotime($max->captured_at)).' Hour: '.$max->hour.':00'):" <span class='text-info'>Hour:</span> ".$max->hour.':00' ?> <br/>
+           <span class="mr-2 "> <span class="text-info">Avg:</span><?= (isset($average))?round($average->load_reading,2):"0" ?>MW</span> 
+           <span class="mr-2"> <span class="text-success">Min. Load: </span><?= $min->load_reading;?>MW <?= ($dt=="month")? (" <span class='text-info'> Day: </span> ".date("d/m/Y",strtotime($min->captured_at)).' Hour: '.$min->hour.':00'):" <span class='text-info'>Hour:</span> ".$min->hour.'.00' ?> </span> 
+              <span class="mr-2"><span class="text-danger">Max. Load: </span><?= $max->load_reading;?>MW <?= ($dt=="month")? (" <span class='text-info'> Day: </span> ".date("d/m/Y",strtotime($max->captured_at)).' Hour: '.$max->hour.':00'):" <span class='text-info'>Hour:</span> ".$max->hour.':00' ?> </span><br/>
               <?php
               if ($dt=="month") {
                    
               if (isset($dayPeak->load_reading)) {
               
                 ?>       
-              <span class="text-success">Day Peak 0:00-17:00: </span><?= $dayPeak->load_reading; ?> <span class='text-info'> Day:</span> <?= date("d/m/Y",strtotime($dayPeak->captured_at)) ?> <span class='text-info'>Hour:</span> <?= $dayPeak->hour.':00'; ?>  | 
+                <br/>
+              <span class="text-success">Day Peak 0:00-17:00: </span><?= $dayPeak->load_reading; ?>MW <span class='text-info'> Day:</span> <?= date("d/m/Y",strtotime($dayPeak->captured_at)) ?> <span class='text-info'>Hour:</span> <?= $dayPeak->hour.':00'; ?>  | 
               <?php 
             }
               if (isset($nightPeak->load_reading)) {
                 ?>              
-              <span class="text-danger">Night Peak 18:00-23:00: </span><?= $nightPeak->load_reading; ?> <span class='text-info'> Day:</span> <?= date("d/m/Y",strtotime($nightPeak->captured_at)) ?> <span class='text-info'>Hour:</span> <?= $nightPeak->hour.':00'; ?>  |
-              <span class="text-success">Day Average 0:00-17:00: </span><?= round($dayAverage['avg'],2); ?> | 
-              <span class="text-danger">Night Average 18:00-23:00: </span><?= round($nightAverage['avg'],2); ?> 
+              <span class="text-danger">Night Peak 18:00-23:00: </span><?= $nightPeak->load_reading; ?>MW <span class='text-info'> Day:</span> <?= date("d/m/Y",strtotime($nightPeak->captured_at)) ?> <span class='text-info'>Hour:</span> <?= $nightPeak->hour.':00'; ?>  |
+              <span class="text-success">Day Average 0:00-17:00: </span><?= round($dayAverage['avg'],2); ?>MW | 
+              <span class="text-danger">Night Average 18:00-23:00: </span><?= round($nightAverage['avg'],2); ?>MW 
               <?php }  } ?> 
               </strong>
               </h6>

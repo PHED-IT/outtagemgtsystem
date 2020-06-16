@@ -104,7 +104,7 @@
           </div>
           <div class="modal-body">
             <?php
-              if ($outage->status==6 && $outage->voltage_level=="33kv") {
+              if ($outage->status>=5 && $outage->voltage_level=="33kv") {
                 ?>
                 <h6>Closure</h6>
                 <form class="confirm_work_done_plan" id="div<?= $outage->outage_id ?>" data-id="<?= $outage->outage_id ?>">

@@ -36,8 +36,20 @@ class FaultResponse_model extends CI_Model
 		
 		return $query->result();
 	}
+
+	public function get_latest_fault(){
+
+		$this->db->from($this->fault_response_table);
+		//$this->db->join("transmission_transformer tr","tr.id=fault_responses.transformer");
+		$this->db->where(['voltage_level'=>"11kv","date_closed"=>null]);
+		
+		$this->db->order_by('id','DESC');
+		$query=$this->db->get();
+		
+		return $query->row();
+	}
 	public function get_outages($data){
-		$this->db->select("fault_responses.*,fa.indicator as indicator,transm.tsname as transmission,iss.iss_names as iss_name,trans.names_trans as transformer,fd.feeder_name as feeder_name,transmN.tsname as transmissionN,issN.iss_names as iss_nameN,transfN.names_trans as transformerN");
+		$this->db->select("fault_responses.*,fa.indicator as indicator,transm.tsname as transmission,iss.iss_names as iss_name,trans.names_trans as transformer,fd.feeder_name as feeder_name,fd_33.feeder_name as feeder33_name,fd_11.feeder_name as feeder11_name,transmN.tsname as transmissionN,issN.iss_names as iss_nameN,transfN.names_trans as transformerN");
 		$this->db->from("fault_responses");
 		$this->db->join("fault_indicators fa","fa.id=fault_responses.reason_id");
 		//$this->db->join("users oro","oro.id=fault_responses.created_by");
@@ -46,6 +58,8 @@ class FaultResponse_model extends CI_Model
 		$this->db->join("iss_tables iss","fault_responses.equipment_id=iss.id and fault_responses.category='Injection substation'", 'left',FALSE);
 		$this->db->join("transformers trans","fault_responses.equipment_id=trans.id and fault_responses.category='Transformer'", 'left',FALSE);
 		$this->db->join("feeders fd","fault_responses.equipment_id=fd.id and fault_responses.category='Feeder' ", 'left',FALSE);
+		$this->db->join("feeders_11kv fd_11","fault_responses.equipment_id=fd_11.id and fault_responses.category='Feeder' and fault_responses.voltage_level='11kv' ", 'left',FALSE);
+		$this->db->join("feeders_33kv fd_33","fault_responses.equipment_id=fd_33.id and fault_responses.category='Feeder' and fault_responses.voltage_level='33kv' ", 'left',FALSE);
 		 $this->db->join(" transmissions transmN","fault_responses.station_id=transmN.id and fault_responses.voltage_level='33kv'", 'left',FALSE);
 		 $this->db->join(" transformers transfN","fault_responses.transformer_id=transfN.id and fault_responses.transformer_id !='' ", 'left',FALSE);
 		 $this->db->join(" iss_tables issN","fault_responses.station_id=issN.id and fault_responses.voltage_level !='33kv' ", 'left',FALSE);

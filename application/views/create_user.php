@@ -53,7 +53,7 @@
                                      <div class="col-md-4">
                                         <label class="col-form-label" for="role">  Role</label>
                                  
-                                            <select class="form-control" name="role" id="role">
+                                            <select class="form-control" name="role" required id="role">
                                                 <?php
                                                     foreach ($roles as $key => $role) {
                                                         ?>
@@ -99,38 +99,11 @@
                                       
                                         <?php echo form_error('zone_id','<span style="color:red">','</span>'); ?>
                                     </div>
-                                       <div class="col-md-4">
-                                        <label class="col-form-label" for="role">  Sub zones</label>
-                                 
-                                            <select class="form-control" name="sub_zone_id" id="sub_zone_id">
-                                                <option value="">Choose Sub zones</option>
-                                                <?php
-                                                    foreach ($sub_zones as $key => $value) {
-                                                        ?>
-                                                        <option 
-                                                        value="<?= $value->id ?>"
-                                                        <?php
-                                                            if (isset($user)) {
-                                                               if ($value->id==$user->sub_zone_id) {
-                                                                   echo ' selected';
-                                                               }
-                                                            }
-                                                        ?>
-                                                            ><?= $value->name ?></option>
-                                                        <?php
-                                                    }
-                                                ?>
-                                            </select>
-                                      
-                                        <?php echo form_error('sub_zone_id','<span style="color:red">','</span>'); ?>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                         <div class="col-md-12">
-                                        <label class="col-form-label" for="iss">  Injection substation(optional)</label>
+                                       <div class="col-md-4" id="iss_div" style="<?= empty($user->iss)?'display: none':''; ?>">
+                                          <label class="col-form-label" for="iss">  Injection substation(DSO)</label>
                                  
                                             <select class="form-control" name="iss" id="iss">
-                                                <option value="">Choose ISS(optional)</option>
+                                                <option value="">Choose ISS</option>
                                                 <?php
                                                     foreach ($iss_data as $key => $value) {
                                                         ?>
@@ -151,9 +124,61 @@
                                       
                                         <?php echo form_error('iss','<span style="color:red">','</span>'); ?>
                                     </div>
+                                       <div class="col-md-4" id="33kv_div" style="<?= empty($user->feeder33kv_id)?'display: none':''; ?>">
+                                          <label class="col-form-label" for="iss">  33kv Feeder(Feeder Managers)</label>
+                                 
+                                            <select class="form-control" id="33kv_feeder" name="33kv_feeder">
+                                                <option value="">Choose 33kv Feeder</option>
+                                                <?php
+                                                    foreach ($feeders_33 as $key => $value) {
+                                                        ?>
+                                                        <option 
+                                                        value="<?= $value->id ?>"
+                                                        <?php
+                                                            if (isset($user)) {
+                                                               if ($value->id==$user->feeder33kv_id) {
+                                                                   echo ' selected';
+                                                               }
+                                                            }
+                                                        ?>
+                                                            ><?= $value->feeder_name ?></option>
+                                                        <?php
+                                                    }
+                                                ?>
+                                            </select>
+                                      
+                                        <?php echo form_error('33kv_feeder','<span style="color:red">','</span>'); ?>
                                     </div>
+
+                                    <div class="col-md-4" id="transmission_div" style="<?= empty($user->transmission_id)?'display: none':''; ?>">
+                                          <label class="col-form-label" for="trans">  Transmission station</label>
+                                 
+                                            <select class="form-control" id="trans_station" name="trans_station">
+                                                <option value="">Choose Transmission station</option>
+                                                <?php
+                                                    foreach ($transmissions as $key => $value) {
+                                                        ?>
+                                                        <option 
+                                                        value="<?= $value->id ?>"
+                                                        <?php
+                                                            if (isset($user)) {
+                                                               if ($value->id==$user->transmission_id) {
+                                                                   echo ' selected';
+                                                               }
+                                                            }
+                                                        ?>
+                                                            ><?= $value->tsname ?></option>
+                                                        <?php
+                                                    }
+                                                ?>
+                                            </select>
+                                      
+                                        <?php echo form_error('trans_station','<span style="color:red">','</span>'); ?>
+                                    </div>
+                                </div>
+                                
                                     <br/>
-                                    <button  class="btn btn-success btn-rounded" type="submit"><?= isset($user) ? 'Edit':'Submit'; ?></button>
+                                    <button  class="btn btn-success btn-rounded" type="submit"><?= isset($user) ? 'Update':'Submit'; ?></button>
                                      <a  class="btn btn-primary btn-rounded" href="<?= base_url('admin/view_users') ?>">Back</a>
                                 </form>
                             </div>

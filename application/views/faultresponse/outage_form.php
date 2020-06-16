@@ -53,7 +53,7 @@
               
               <label class="col-form-label" for=""> Response type</label>
               <select required class="form-control" name="type_response">
-                <option value="">Choose </option>
+                
                 <option value="1">Fault</option>
                 <option value="2">Rapid</option>
               </select>
@@ -69,7 +69,7 @@
              <input type="text" name="location" required class="form-control">
               </div>  --> 
 
-              <div class="col-md-6"> 
+              <div class="col-md-4"> 
               <label class="col-form-label" for=""> Indicators</label>
               <select class="form-control" name="reason_id">
                   <?php
@@ -83,7 +83,7 @@
                 </select>
               </div>
 
-              <div class="col-md-6"> 
+              <div class="col-md-4"> 
               <label class="col-form-label" for=""> Department</label>
               <select class="form-control" required name="department">
                   <option>PC&M</option>           
@@ -91,8 +91,11 @@
                   <option>S/S</option>           
               </select>
               </div>
+              <div class="col-md-4"> 
+              <label class="col-form-label" for=""> Load Loss</label>
+              <input type="text" name="load_loss" class="form-control">
               </div> 
-
+            </div>
                 <div class="row">
               <div class="col-md-12">
               <label class="col-form-label" for=""> Enter remark</label>

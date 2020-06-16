@@ -5,10 +5,27 @@
               <div class="card">
                 <div class="card-header">
                   <h4>Feeder Manager (Plan outage)</h4>
+                  <div class="card-header-action">
+                       <a class="btn btn-sm btn-outline-primary justify-content-end" style="" href="<?= base_url('planned/outage_request_form') ?>?req_officer=ibc"><i class="fa fa-plus"></i> New Request</a>
+                    </div>
                 </div>
                       
       <div class="card-body">
-                  <table id="simpleTable1" class="table tables  table-bordered table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
+           <ul class="nav nav-tabs" id="myTab" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                          aria-controls="home" aria-selected="true" style="color: #000">Outages</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="profile-tab" style="color: #000" data-toggle="tab" href="#profile" role="tab"
+                          aria-controls="profile" aria-selected="false">-</a>
+                      </li>
+                     
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <!-- 33kv -->
+                         <table id="simpleTable1" class="table tables  table-bordered table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
                      <thead>
                       <tr>
                        <th> Id</th>
@@ -36,20 +53,14 @@
                     <?php
                       if ($outage->category=="Transmission station") {
                         echo $outage->transmission;
-                      }elseif ($outage->category=="Injection substation") {
-                        echo $outage->iss_name;
                       }elseif ($outage->category=="Transformer") {
                         if ($outage->voltage_level=="33kv") {
                            echo $outage->transmissionN." > <span class='text-info'>".$outage->transformer."</span>";
-                        }else{
-                          echo $outage->iss_nameN." > <span class='text-info'>".$outage->transformer."</span>";
                         }
                        
                       }elseif ($outage->category=="Feeder") {
                         if ($outage->voltage_level=="33kv") {
                            echo $outage->transmissionN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder_name."</span>";
-                        }else{
-                           echo $outage->iss_nameN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder_name."</span>";
                         }
                       }
                     ?>
@@ -86,13 +97,13 @@
               <?php } ?>
                   </td>  
                   <td>
-                      <button  class="  btn-primary" data-toggle="modal" data-target="#modal<?= $outage->outage_id ?>" data-placement="bottom"
+                      <button  class="  btn-primary" data-toggle="modal" data-target="#emodal<?= $outage->outage_id ?>" data-placement="bottom"
                 title=" Acknowledge"><span class="fa fa-flash"></span></button>
 
 
 
                         <!-- acknowledge modal -->
-                          <div class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);z-index: 1" id="modal<?= $outage->outage_id ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);z-index: 1" id="emodal<?= $outage->outage_id ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document" >
         <div class="modal-content">
          
@@ -108,20 +119,14 @@
 
                       if ($outage->category=="Transmission station") {
                         echo $outage->transmission;
-                      }elseif ($outage->category=="Injection substation") {
-                        echo $outage->iss_name;
                       }elseif ($outage->category=="Transformer") {
                         if ($outage->voltage_level=="33kv") {
                            echo $outage->transmissionN." > <span class='text-info'>".$outage->transformer."</span>";
-                        }else{
-                          echo $outage->iss_nameN." > <span class='text-info'>".$outage->transformer."</span>";
                         }
                        
                       }elseif ($outage->category=="Feeder") {
                         if ($outage->voltage_level=="33kv") {
                            echo $outage->transmissionN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder_name."</span>";
-                        }else{
-                           echo $outage->iss_nameN." > ".$outage->transformerN." >  <span class='text-info'>".$outage->feeder_name."</span>";
                         }
                       }
                     ?>
@@ -228,6 +233,14 @@
                       </tbody>
                                    
             </table>
+                       </div>
+                       <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <!-- 11kv -->
+            -
+          </div>
+        </div>
+
+                 
                 
               </div>
             </div>

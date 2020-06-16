@@ -67,15 +67,20 @@ class Admin extends MY_Controller
 		$data['users']=$this->admin_model->get_users();
 		//$data['ibc']=$this->admin_model->get_ibc();
 		$data['zones']=$this->admin_model->get_zones();
-		$data['sub_zones']=$this->admin_model->get_sub_zones();
+		//$data['sub_zones']=$this->admin_model->get_sub_zones();
 		$data['roles']=$this->admin_model->get_roles();
 		$data['iss_data']=$this->input_model->get_iss();
+		$data['transmissions']=$this->input_model->get_transmissions();
+		$data['feeders_33']=$this->input_model->get_33kvfeeders();
 		$data['title']="Get all users";
 		$this->load->view('Layouts/header',$data);
 		$this->load->view('view_users',$data);
 		$this->load->view('Layouts/footer');
 	}else{
-		$insert_data=array('staff_id'=>$this->input->post('staff_id'),'first_name'=>$this->input->post('first_name'),'last_name'=>$this->input->post('last_name'),'email'=>$this->input->post('email'),'role_id'=>$this->input->post('role'),'phone'=>'234'.substr($this->input->post('phone'),1),'password'=>password_hash("password", PASSWORD_DEFAULT),'zone_id'=>$this->input->post('zone_id'),'sub_zone_id'=>$this->input->post('sub_zone_id'),'iss'=>$this->input->post('iss'));
+		$iss=(!empty($this->input->post('iss')))?$this->input->post('iss'):"";
+		$feeders_33_id=(!empty($this->input->post('33kv_feeder')))?$this->input->post('33kv_feeder'):"";
+		$trans_station=(!empty($this->input->post('trans_station')))?$this->input->post('trans_station'):"";
+		$insert_data=array('staff_id'=>$this->input->post('staff_id'),'first_name'=>$this->input->post('first_name'),'last_name'=>$this->input->post('last_name'),'email'=>$this->input->post('email'),'role_id'=>$this->input->post('role'),'phone'=>'234'.substr($this->input->post('phone'),1),'password'=>password_hash("password", PASSWORD_DEFAULT),'zone_id'=>$this->input->post('zone_id'),'iss'=>$iss,"feeder33kv_id"=>$feeders_33_id,"transmission_id"=>$trans_station);
 
 			$result=$this->admin_model->create_user($insert_data);
 			if ($result['status']) {
@@ -184,14 +189,18 @@ class Admin extends MY_Controller
 			$data['user']=$this->admin_model->get_user($user_id);
 			
 			$data['zones']=$this->admin_model->get_zones();
-			$data['sub_zones']=$this->admin_model->get_sub_zones();
+			$data['feeders_33']=$this->input_model->get_33kvfeeders();
 			$data['iss_data']=$this->input_model->get_iss();
+			$data['transmissions']=$this->input_model->get_transmissions();
 			$this->load->view('Layouts/header',$data);
 			$this->load->view('create_user',$data);
 			$this->load->view('Layouts/footer');
 		} else {
+			$iss=(!empty($this->input->post('iss')))?$this->input->post('iss'):"";
+		$feeders_33_id=(!empty($this->input->post('33kv_feeder')))?$this->input->post('33kv_feeder'):"";
+		$trans_station=(!empty($this->input->post('trans_station')))?$this->input->post('trans_station'):"";
 			//$this->load->model('admin_model');
-			$insert_data=array('staff_id'=>$this->input->post('staff_id'),'first_name'=>$this->input->post('first_name'),'last_name'=>$this->input->post('last_name'),'email'=>$this->input->post('email'),'role_id'=>$this->input->post('role'),'phone'=>$this->input->post('phone'),'zone_id'=>$this->input->post('zone_id'),'sub_zone_id'=>$this->input->post('sub_zone_id'),'iss'=>$this->input->post('iss'));
+			$insert_data=array('staff_id'=>$this->input->post('staff_id'),'first_name'=>$this->input->post('first_name'),'last_name'=>$this->input->post('last_name'),'email'=>$this->input->post('email'),'role_id'=>$this->input->post('role'),'phone'=>$this->input->post('phone'),'zone_id'=>$this->input->post('zone_id'),'feeder33kv_id'=>$feeders_33_id,'iss'=>$iss,'transmission_id'=>$trans_station);
 
 			$result=$this->admin_model->update_user($user_id,$insert_data);
 			if ($result['status']) {

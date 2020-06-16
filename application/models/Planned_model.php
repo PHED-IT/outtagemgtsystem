@@ -100,26 +100,50 @@ class Planned_model extends CI_Model
 		$query=$this->db->get();
 		return $query->result();
 	}
-	public function get_outage_all($data){
-		$this->db->select("planned_outages.*,oro.first_name as oro_f,oro.last_name as oro_l,ph.first_name as ph_f,ph.last_name as ph_l,oro.designation as oro_desig,transm.tsname as transmission,iss.iss_names as iss_name,trans.names_trans as transformer,fd.feeder_name as feeder_name,transmN.tsname as transmissionN,issN.iss_names as iss_nameN,transfN.names_trans as transformerN,reason.name as reason");
+	public function get_outage_all($data,$voltage_level,$user_type=""){
+		if ($voltage_level=="33kv") {
+			# 33kv...
+			$this->db->select("planned_outages.*,oro.first_name as oro_f,oro.last_name as oro_l,ph.first_name as ph_f,ph.last_name as ph_l,oro.designation as oro_desig,transm.tsname as transmission,trans.names_trans as transformer,fd.feeder_name as feeder_name,transmN.tsname as transmissionN,transfN.names_trans as transformerN,reason.name as reason");
+		} else {
+			# 11kv
+			$this->db->select("planned_outages.*,oro.first_name as oro_f,oro.last_name as oro_l,ph.first_name as ph_f,ph.last_name as ph_l,oro.designation as oro_desig,iss.iss_names as iss_name,transfN.names_trans as transformerN,trans.names_trans as transformer,fd.feeder_name as feeder_name,issN.iss_names as iss_nameN,reason.name as reason");
+		}
+		
+		
+		
+		
 		$this->db->from($this->planned_outages_table);
 		//$this->db->join("fault_indicators fa","fa.id=planned_outages.fault_indicator");
 		$this->db->join("users oro","oro.id=planned_outages.created_by");
 		$this->db->join("users ph","ph.id=planned_outages.permit_holder_id");
-		$this->db->join("transmissions transm","planned_outages.equipment_id=transm.id and planned_outages.category='Transmission station'", 'left',FALSE);
+		
 		$this->db->join("reason_outages reason","planned_outages.reason=reason.id ");
-		$this->db->join("iss_tables iss","planned_outages.equipment_id=iss.id and planned_outages.category='Injection substation'", 'left',FALSE);
-		$this->db->join("transformers trans","planned_outages.equipment_id=trans.id and planned_outages.category='Transformer'", 'left',FALSE);
-		$this->db->join("feeders fd","planned_outages.equipment_id=fd.id and planned_outages.category='Feeder' ", 'left',FALSE);
+		if ($voltage_level=="33kv") {
+			# 33kv 
+			$this->db->join("transmissions transm","planned_outages.equipment_id=transm.id and planned_outages.category='Transmission station'", 'left',FALSE);
+
 		 $this->db->join(" transmissions transmN","planned_outages.station_id=transmN.id and planned_outages.voltage_level='33kv'", 'left',FALSE);
+		 $this->db->join("feeders_33kv fd","planned_outages.equipment_id=fd.id and planned_outages.category='Feeder' ", 'left',FALSE);
+		} else {
+			# 11kv
+
+				$this->db->join("iss_tables iss","planned_outages.equipment_id=iss.id and planned_outages.category='Injection substation'", 'left',FALSE);
+			$this->db->join(" iss_tables issN","planned_outages.station_id=issN.id and planned_outages.voltage_level ='11kv' ", 'left',FALSE);
+			$this->db->join("feeders_11kv fd","planned_outages.equipment_id=fd.id and planned_outages.category='Feeder' ", 'left',FALSE);
+			
+			
+			
+		}
+		
+		
+		$this->db->join("transformers trans","planned_outages.equipment_id=trans.id and planned_outages.category='Transformer'", 'left',FALSE);
+		
 		 $this->db->join(" transformers transfN","planned_outages.transformer_id=transfN.id and planned_outages.transformer_id !='' ", 'left',FALSE);
-		 $this->db->join(" iss_tables issN","planned_outages.station_id=issN.id and planned_outages.voltage_level ='11kv' ", 'left',FALSE);
-		 // $this->db->join(" feeders fdN","planned_outages.feeder_id=fd.id and planned_outages.voltage_level !='11kv' ", 'left',FALSE);
+		 
+		 
 
 		$this->db->where($data);
-		// if (isset($data['request_from'])) {
-		// 	$this->db->where('request_from',"hq");
-		// }
+		
 		$this->db->order_by('id','DESC');
 		$query=$this->db->get();
 		return $query->result();

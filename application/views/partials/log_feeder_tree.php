@@ -28,7 +28,36 @@
  <input type="hidden" id="station_id" name="station_id" >
                     <input type="hidden" id="voltage_level" name="voltage_level">
       <?php
-    } else {
+    } elseif ($user->role_id==35) {
+      //user is transmission dso
+      ?>
+      <div class="row">
+            
+      <div class="col-md-4 iss_log_div" id="" style="">
+<label>Transmission Substation</label>
+<select class="form-control" name="trans_st" id="trans_st">
+    <option value="">Transmission Substation</option>
+    <option value="<?= $station->id ?>"><?= $station->tsname ?></option>
+   
+</select>
+</div>
+<div class="col-md-4 iss_log_div" id="" style="">
+
+    <label>Power Transformer</label>
+    <select class="form-control"  name="transformer" id="transformer_33">
+    <option value="">No Transformer data</option>
+                
+    </select>
+
+                                                
+</div>
+
+ <input type="hidden" id="station_id" name="station_id" >
+                    <input type="hidden" id="voltage_level" name="voltage_level">
+      <?php
+    }
+
+    else {
       ?>
 
          <div class="d-flex justify-content-start">   

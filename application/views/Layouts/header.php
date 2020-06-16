@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
-    <!-- <link rel="icon" type="image/png" sizes="16x16" href="<?php //echo asset_url();?>img/favicon.png"> -->
+    <link rel="icon" type="image/png" sizes="16x16" href="<?php echo asset_url();?>img/favicon.png"> 
     
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title><?php echo $title; ?></title>
@@ -24,7 +24,8 @@
 
      <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet" type="text/css"> -->
    
-     
+      <script src="http://maps.google.com/maps/api/js?key=AIzaSyC223rsW34u3YLJWAeFvquz-lxUL-SOUuk&sensor=false" 
+          type="text/javascript"></script>  
     
     <script type="text/javascript">
         window.BASE_URL="<?= base_url() ?>"
@@ -40,8 +41,13 @@
     <link rel="stylesheet" href="<?php echo asset_url();?>bundles/pretty-checkbox/pretty-checkbox.min.css">
      <link rel="stylesheet" href="<?php echo asset_url();?>css/MonthPicker.min.css">  
       <link rel="stylesheet" href="<?php echo asset_url();?>/bundles/izitoast/css/iziToast.min.css">
+       <script src="<?php echo asset_url();?>js/app.min.js" ></script>
+  <script src="https://code.jquery.com/jquery-migrate-3.0.0.min.js" ></script>
     <style type="text/css">
-        
+        #map {
+        height: 400px;  /* The height is 400 pixels */
+        width: 100%;  /* The width is the width of the web page */
+       }
          .ui-datepicker-calendar {
         display: none;
         }
@@ -144,6 +150,7 @@ fieldset.scheduler-border {
   position: relative;
   border-collapse: collapse; 
 }*/
+  
 th{
    /* background: white;
   position: sticky;
