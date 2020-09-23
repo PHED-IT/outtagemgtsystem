@@ -29,6 +29,7 @@
 
       <?php
     }elseif ($user->role_id==35) {
+      //transmission dso
       ?>
       <div class="row">
                 <div id="spinner"></div>
@@ -47,6 +48,7 @@
                 <option value="">No Transformer data</option>
                  </select>                                  
                 </div>
+                <input type="hidden" name="asset_name" value="TS" >   
       <?php
 
     } else {
@@ -78,7 +80,7 @@
              <div class="col-md-4 ts_div_log" id="">
 
             <label> Transmission station</label>
-                <select class="form-control" name="trans_st" id="trans_st">
+                <select style="width: 100%" class="form-control" name="trans_st" id="trans_st">
                  <option value=""> Transmission Station</option>
                     <?php
                         foreach ($ts_data as $key => $value) {
@@ -109,7 +111,7 @@
             
     <div class="col-md-4 iss_log_div" id="" style="display: none">
 <label>Injection Substation</label>
-<select class="form-control" name="iss_name" id="iss_name">
+<select class="form-control" style="width: 100%" name="iss_name" id="iss_name">
     <option value="">Injection Substation</option>
     <?php
         foreach ($iss_data as $key => $value) {
@@ -126,7 +128,7 @@
 <div class="col-md-4 iss_log_div" id="" style="display: none">
 
     <label>Power Transformer</label>
-    <select class="form-control" name="transformer_iss" id="transformer_iss">
+    <select class="form-control" style="width: 100%" name="transformer_iss" id="transformer_iss">
     <option value="">No Transformer data</option>
                 
     </select>
@@ -140,7 +142,7 @@
 <div class="col-md-4">
               
               <label class="" for="feeder_name"> Choose Feeder</label>
-              <select class="form-control" name="feeder_id" id="feeder_name">
+              <select class="form-control" style="width: 100%" name="feeder_id" id="feeder_name">
                                                     
              <option value="">Choose Feeder</option>
               </select>

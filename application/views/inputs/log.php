@@ -20,20 +20,20 @@
  <?php $this->load->view('partials/log_feeder_tree'); ?>
 <p class="my-2" id="latest_entry" style="font-weight: bold;"></p>
 
-<table class="my-3 table table-striped table-responsive" >
+<table class="my-3 table table-striped table-responsive" style="background-color:#278acd;color:white">
 <thead>
 <tr>
-<th>Feeder</th>
-<th>Status</th>
-<th>Voltage(KV)</th>
-<th>Current(AMP)</th>
-<th>Power factor(PF)</th>
+<th style="color: #fff">Feeder</th>
+<th style="color: #fff">Status</th>
+<th style="color: #fff">Voltage(KV)</th>
+<th style="color: #fff">Current(AMP)</th>
+<th style="color: #fff">Power factor(PF)</th>
 
 
-<th>Frequency(F)</th>
-<th>Load(MW)</th>
-<th>Load(KVAR)</th>
-<th>Remarks(optional)</th>
+<th style="color: #fff">Frequency(F)</th>
+<th style="color: #fff">Load(MW)</th>
+<th style="color: #fff">Load(KVAR)</th>
+<th style="color: #fff">Remarks(optional)</th>
 
 </tr>
 </thead>

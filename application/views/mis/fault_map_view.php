@@ -1,4 +1,4 @@
-
+  <div id="loader_submit"></div>
 <div class="card">
  <div class="card-header"><h4>FAULT ON MAP VIEW </h4>
 <div class="card-header-action">
@@ -6,9 +6,35 @@
 </div>
  </div>
  <div class="card-body">
+  <div class="alert alert-info" style="background-color: #ff776b">
 
+    <marquee hspace = "20" onmouseover="this.stop();" onmouseout="this.start();"><span class="font-weight-bold">SUMMARY - </span>
+
+      <?php
+        foreach ($fault_summary as $key => $value) {
+          if ($value->voltage_level=="33kv") {
+              ?>
+              <span><span class="fa fa-map-marker"></span> <?= $value->feeder33_name ?> 33kv * <?= $value->indicator ?>*</span>
+              <?php
+
+          } else {
+            ?>
+             <span><span class="fa fa-map-marker"></span> <?= $value->feeder11_name ?> 11kv * <?= $value->indicator ?>*</span>
+            <?php
+          }
+          
+          
+        }
+      ?>
+    </marquee>
+  </div>
+  <button class="btn btn-outline-success" id="refresh"><span class="fa fa-refresh"></span></button>
+  <h4 id="text_title"></h4>
+  <p id="label_state"> <img src="http://localhost/phed_outage/assets/img/state.png" width="18" height="18"> - <span>State</span></p>
+  <p id="label_station" style="display: none;"> <img src="http://localhost/phed_outage/assets/img/coil.png" width="18" height="18"> - <span>Station without affected feeders</span>  | <img src="http://localhost/phed_outage/assets/img/coild.png" width="18" height="18"> - <span>Station with affected feeders</span></p>
+ 
   <div id="map" style="">
- <center><h3 class="text text-danger my-5"><span class="fa fa-spinner fa-spin fa-5x"></span> Loading customers coordinates...</h></center>
+ <center><div class="alert alert-info my-5"><span class="fa fa-spinner fa-spin fa-5x"></span> Loading customers coordinates...</div></center>
   </div>
 
 </div>
@@ -90,46 +116,133 @@
        
 <script type="text/javascript">
 
+$(document).on('click','#refresh',function(e){
+  $('#text_title').text('')
+  $('#label_state').show()
+  $('#label_station').hide()
+  showStateMap();
+})
 $(document).on('submit','#searchForm',function(e){
   e.preventDefault();
   var assetType;
   var voltage_level=$('#voltage_level_map').val();
 
   var feeder_id=$('#feeder_id').val();
+  var feeder_name=$( "#feeder_id option:selected" ).text();
+  $('#text_title').text("Showing Affected Customers on "+feeder_name+" Feeder");
+  $('#text_title').hide()
   if (voltage_level=="33kv") {
     assetType="FEEDER33ID";
   } else {
     assetType="FEEDER11ID";
   }
   $('#searchModal').modal('hide')
-  showMap(assetType,feeder_id)
-
-
-    
+ // showMap(assetType,feeder_id) 
 })
 
-function showMap(assetType,assetid){
-    if (assetid!=0) {
-      //alert(assetid)
-      $('#map').html('<center><h3 class="text text-danger my-5"><span class="fa fa-spinner fa-spin"></span> Loading customers coordinates...</h3></center>')
-$.post("http://10.10.25.31:8084/nomsapiwslim/v1/getCustomersByAssets",
-  {
-    assetid: assetid,
-    assettype:assetType,
 
-  },
-  function(resp, status){
-    //console.log("rec",resp)
-    //var response=JSON.parse(resp);
+function showMap(resp,iss_faults,lat,long){
+  //alert(assetid)
+    
+     //console.log("rec",enumx)
     var locations=[];
     if (resp.length>0) {
+     // spinner.hide()
+      //$('#text_title').show()
       console.log("jsom",resp)
       resp.map(function(item){
-        locations.push(["Customer",item.Customer_Coord.match("(.*)/")[1],item.Customer_Coord.match("/(.*)")[1]])
+        console.log("jsddom",item.iss_coord.match("/(.*)")[1])
+       
+       if (item.iss_coord.match("/(.*)")[1]) {
+           //console.log('d',item.iss_coord.match("/(.*)")[1])
+          var card=iss_faults.some(function(iss_fault){
+            console.log("ddzs",iss_fault.station_id);
+            return (iss_fault.station_id == item.id);
+           })
+          console.log("log",card);
+            if (card) {
+              locations.push([item.iss_names,item.iss_coord.match("(.*)/")[1],item.iss_coord.match("/(.*)")[1],'http://localhost/phed_outage/assets/img/coild.png',item.id])
+            } else {
+              locations.push([item.iss_names,item.iss_coord.match("(.*)/")[1],item.iss_coord.match("/(.*)")[1],'http://localhost/phed_outage/assets/img/coil.png',item.id])
+            }
+            
+           
+          }
+        
+        
       })
       console.log("locx",locations)
       var map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 10,
+      zoom: 9,
+      center: new google.maps.LatLng(lat,long ),
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+
+    var infowindow = new google.maps.InfoWindow();
+
+    var marker, i;
+
+    for (i = 0; i < locations.length; i++) {  
+
+      marker = new google.maps.Marker({
+        position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+        map: map,
+        icon: locations[i][3],
+        //label: "booo",
+      });
+
+      google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        //var url=BASE_URL+"mis/get_fualt_feeder_by_iss";
+        // $.post(url,{
+        //   iss:locations[i][3]
+        // },
+        // function(result){
+        //   console.log(result)
+        // }
+        // )
+
+        return function() {
+          var url=BASE_URL+"mis/get_fualt_feeder_by_iss";
+          console.log(locations[i][4])
+        $.post(url,{
+          iss:locations[i][4]
+        },
+        function(result){
+          var data=JSON.parse(result)
+          infowindow.setContent("<b>ISS NAME:</b>"+"<span style='color:#3b5998'>"+locations[i][0]+"</span><br/><b><span style='color:red'>AFFECTED FEEDERS:</b> "+data.num+"</span>");
+          infowindow.open(map, marker);
+        }
+        )
+          
+        }
+      })(marker, i));
+    }
+    $("#map").css({"width": "100%","height":"450px"});
+    }
+    
+  }
+
+
+
+
+function showStateMap(){
+  //alert(assetid)
+    
+     //console.log("rec",enumx)
+    var locations=[
+      ["Rivers State",4.74974, 6.82766,1],
+      ["Bayelsa State",4.664030, 6.036987,2],
+      ["Akwa Ibom State",5.0 ,7.83333,4],
+      ["Cross River State",4.583331, 8.416665,3],
+    ];
+    
+     // spinner.hide()
+      //$('#text_title').show()
+    
+     
+      console.log("locx",locations)
+      var map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 8,
       center: new google.maps.LatLng(4.8396,6.9112 ),
       mapTypeId: google.maps.MapTypeId.ROADMAP
     });
@@ -139,71 +252,48 @@ $.post("http://10.10.25.31:8084/nomsapiwslim/v1/getCustomersByAssets",
     var marker, i;
 
     for (i = 0; i < locations.length; i++) {  
+
       marker = new google.maps.Marker({
         position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-        map: map
+        map: map,
+        icon: "http://localhost/phed_outage/assets/img/state.png",
+         label: {
+    text: locations[i][0],
+    color: 'blue',
+  }
       });
 
       google.maps.event.addListener(marker, 'click', (function(marker, i) {
+       
         return function() {
-          infowindow.setContent(locations[i][0]);
-          infowindow.open(map, marker);
+          $('#text_title').text("Showing Stations in "+locations[i][0])
+          $('#label_state').hide()
+  $('#label_station').show()
+           var url=BASE_URL+"mis/get_iss_by_state";
+           console.log(locations[i][3])
+        $.post(url,{
+          state:locations[i][3]
+        },
+        function(result){
+          
+          var data=JSON.parse(result);
+          console.log(data)
+          showMap(data.iss,data.iss_faults,locations[i][1],locations[i][2])
+
+        }
+        )
+
         }
       })(marker, i));
     }
-    }
+    $("#map").css({"width": "100%","height":"450px"});
     
-  });
-            }else{
-              //not enumeration id for assets
-              //spinner.hide();
-              //alert("Success! Your fault id is: "+data.outage_id);
-                //  $("#faultReponseForm")[0].reset()
-            }
-}
+    
+  }
+
+
   $(document).ready(function(){
-    var url=BASE_URL+"mis/get_latest_fault";
-    $.ajax({
-        url:url,
-        type:'POST',
-        data:"",
-        success:function(response){
-
-            
-            console.log(response)
-            var data=JSON.parse(response);
-            if (data.status) {
-                //$('#modal'+id).modal('hide')
-
-              showMap(data.assetType,data.assetId)
-               
-            }else{
-                Swal.fire({
-                  position: 'top-end',
-                  type: 'error',
-                  title: "Oops! there is an error fetching customers",
-                  showConfirmButton: false,
-                  timer: 1500
-                });
-                // $('#sub'+id).attr('disabled',false)
-                // $('#sub'+id).html("Submit")
-            }
-        },
-        error:function(error){
-            spinner.hide();
-            console.log(error)
-            console.log(url)
-              Swal.fire({
-                  position: 'top-end',
-                  type: 'error',
-                  title: "Oops Error!!",
-                  showConfirmButton: false,
-                  timer: 1500
-                });
-                $('#sub'+id).attr('disabled',false)
-                $('#sub'+id).html("Submit")
-        }
-     })   
+   showStateMap()
   })
     var locationx = [
       [ -33.890542, 151.274856],

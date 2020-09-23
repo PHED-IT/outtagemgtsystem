@@ -29,6 +29,8 @@ $('#choose_menu').change(function(){
 }
 })
 
+  $("select").select2();
+
 $('#component').change(function(){
     if ($(this).val()!='') {
         var url=BASE_URL+"tripping/get_fault_inidcators_by_id";
@@ -207,6 +209,91 @@ $(document).on('submit','#logForm',function(e){
 }
 })
 })
+
+$(document).on('submit','#loadMytoInput',function(e){
+    
+    e.preventDefault();
+    
+    var voltage_level=$('#voltage_level').val();
+    Swal.fire({
+  title: 'Are you sure?',
+  text: "You want to submit",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then((result) => {
+    if (result.value) {
+    var spinner = $('#loader_submit');
+    spinner.show();
+    var url=BASE_URL+"loadanalysis/store";
+    var form=$(this);
+    var data=form.serialize();
+    $.ajax({
+        type:"POST",
+        url:url,
+        data:data,
+        success:function(response){
+            console.log(response)
+            var dataX=JSON.parse(response);
+            spinner.hide();
+            if (dataX.status) {
+                Swal.fire({
+                  position: 'top-end',
+                  type: 'success',
+                  title: dataX.data,
+                  showConfirmButton: false,
+                  timer: 1500
+                });
+                //var latest_entry="Last entry date: "+$('#captured_date').val()+" | Hour: "+hour+".00"
+                //$('#latest_entry').text(latest_entry);
+
+                
+                    //11kv 
+                    $('.myto_allocaton_mw').val('');
+                    $('.myto_allocaton_a').val('');
+                    $('.consumption_embeded').val('');
+                    $('.forecasted_load').val('');
+                                       // $('#tbody').html('');
+                   // $('#button-container').hide();
+                
+                
+           // $('#station_id').val('')
+            //$('#station_type').val("")
+           // $('#button-container').hide();
+            //$('#latest_entry').hide();
+                //$("#logForm")[0].reset()
+
+            } else {
+                Swal.fire({
+                  position: 'top-end',
+                  type: 'error',
+                  title: dataX.data,
+                  showConfirmButton: false,
+                  timer: 3500
+                });
+            }
+            
+        },
+        error:function(response){
+            console.log(response)
+            var dataX=JSON.stringify(response);
+            spinner.hide();
+            Swal.fire({
+                  position: 'top-end',
+                  type: 'error',
+                  title: dataX,
+                  showConfirmButton: false,
+                  timer: 3500
+                });
+        }
+    })
+}
+})
+})
+
+
 $(document).on('submit','#logFormNew',function(e){
     
     e.preventDefault();
@@ -795,7 +882,7 @@ $('#transformer_33').change(function(){
                 energyIncomer+="</tr>";
                 $('#feeder_name').append('<option value="" >All feeders</option>');
                 if ($('#log_new').val()=="log_new") {
-                     $('#feeder_name').append('<option value="'+incommer+'" >Incommer</option>');
+                     $('#feeder_name').append('<option value="'+incommer+'" >INCOMMER</option>');
                 } 
                
 
@@ -1111,7 +1198,12 @@ $(document).on('blur','.pf_input', function (event) {
 
 $('#show_report_click').click(function(){
   //$('#show_report_click').prop('disabled',true)
-  $('#show_report_click_div').show()
+  //$('#show_report_click_div').show()
+  $("#loadMe").modal({
+      backdrop: "static", //remove ability to close modal with click
+      keyboard: false, //remove option to close with keyboard
+      show: true //Display loader!
+    });
 })
 
 
@@ -2305,7 +2397,7 @@ $(document).on('click','.action_plan_out_hibc',function(){
                 Swal.fire({
                   position: 'top-end',
                   type: 'success',
-                  title: data.message,
+                  title: "Approval successfull... Waiting for Network manager approval",
                   showConfirmButton: false,
                   timer: 2500
                 });
@@ -2393,26 +2485,26 @@ $(document).on('click','.approve_plan_out_tso',function(){
     var id=$(this).attr('id');
     
     var url=BASE_URL+"planned/approve_plan_out_tso";
-    if(!$('#two').is(":checked")||!$('#three').is(":checked")) {
-        Swal.fire({
-          position: 'top-end',
-          type: 'error',
-          title: "Check all boxes!",
-          showConfirmButton: false,
-          timer: 1500
-        });
-        return;
-    }
-    if ($('#ptw_number').val()=="") {
-        Swal.fire({
-          position: 'top-end',
-          type: 'error',
-          title: "PTW number must be entered",
-          showConfirmButton: false,
-          timer: 1500
-        });
-        return;
-    }
+    // if(!$('#two').is(":checked")) {
+    //     Swal.fire({
+    //       position: 'top-end',
+    //       type: 'error',
+    //       title: "Check all boxes!",
+    //       showConfirmButton: false,
+    //       timer: 1500
+    //     });
+    //     return;
+    // }
+    // if ($('#ptw_number').val()=="") {
+    //     Swal.fire({
+    //       position: 'top-end',
+    //       type: 'error',
+    //       title: "PTW number must be entered",
+    //       showConfirmButton: false,
+    //       timer: 1500
+    //     });
+    //     return;
+    // }
     Swal.fire({
   title: 'Are you sure?',
   text: "You want to continue",
@@ -2621,40 +2713,30 @@ $(document).on('submit','#faultReponseForm',function(e){
             console.log(response)
             var data=JSON.parse(response);
             if (data.status) {
-                //$('#modal'+id).modal('hide')
-                if (data.assetId!="") {
-                $.post("http://10.10.25.31:8084/nomsapiwslim/v1/getCustomersPhoneByAssets",
-  {
-    assetid: data.assetId,
-    assettype:data.assetType,
-
-  },
-  function(resp, status){
-    console.log("rec",resp)
-    $.post(BASE_URL+"FaultResponse/store_customers_contact",
-      { records : JSON.stringify(resp) ,outage_id:JSON.stringify(data.outage_id)},
-      function(result,status){
-        spinner.hide();
+             spinner.hide();
          alert("Success! Your fault id is: "+data.outage_id);
-                  $("#faultReponseForm")[0].reset()
-      }
-      )
-  });
-            }else{
-              spinner.hide();
-              alert("Success! Your fault id is: "+data.outage_id);
-                  $("#faultReponseForm")[0].reset()
-            }
-               
-  //                 iziToast.success({
-  //   title: 'Success!',
-  //   message: 'Request is successfull',
-  //   position: 'topRight'
-  // });
-                  
-                  //window.history.back();
-                 //$('#div'+id).hide();
-               // location.reload();
+                  $("#faultReponseForm")[0].reset();
+                  $("#trans_st").html("");
+                  $("#transformer_33").html("");
+                  $("#iss_name").html("");
+                  $("#transformer_iss").html("");
+                  $("#feeder_name").html("");
+                //   if (data.assetId!="") {
+                //    var url="http://10.10.25.31:8084/nomsapiwslim/v1/getCustomersPhoneByAssets";
+                // $.post(url,{
+                //   assetid:data.assetId,
+                //   assettype:data.assetType
+                // },
+                // function(result){
+                //   console.log(result)
+                // }
+                // )
+                // .fail(function(error){
+                //   console.log(error);
+                //   alert("Success! Your fault id is: "+data.outage_id);
+                //   $("#faultReponseForm")[0].reset();
+                // })
+                //   }
             }else{
                 Swal.fire({
                   position: 'top-end',
@@ -2783,7 +2865,11 @@ $(document).on('submit','#planSubmitForm',function(e){
      $.ajax({
         url:url,
         type:'POST',
-        data:data,
+        
+        data:new FormData(this),  
+         contentType: false,  
+         cache: false,  
+         processData:false, 
         success:function(response){
             spinner.hide();
             console.log(response)
@@ -3388,16 +3474,38 @@ $(document).on('submit','.tso_reject_plan_out',function(e){
 
 $('.report_type').change(function(){
   $('#show_report_click').prop('disabled',false)
-  if ($('.report_type option:selected').val()=="coincidental") {
+  if ($('.report_type option:selected').val()=="summation_transmission") {
         $('.ts_div_log').show();
+        $('.peak_day_div').hide();
+    }else if($('.report_type option:selected').val()=="summary" || $('.report_type option:selected').val()=="phed_total"){
+      $('.ts_div_log').hide();
+        $('.peak_day_div').hide();
     } else {
         $('.ts_div_log').hide();
+        $('.peak_day_div').show();
+    }
+})
+
+$('#report_type_fault').change(function(){
+  //$('#show_report_click').prop('disabled',false)
+  if ($('#report_type_fault option:selected').val()=="Summary") {
+        $('#status_div').show();
+        //$('.peak_day_div').hide();
+    } else {
+       $('#status_div').hide();
     }
 })
 
 
 $('#feeder_name').change(function(){
+  if ($("#load_analysis").val()=="true") {
+    //user is on load analysis page.
+    var url=BASE_URL+"loadanalysis/getLatestFeederReading";
+  } else {
+    //user is on other page
     var url=BASE_URL+"input/getLatestFeederReading";
+  }
+    
     //alert($('#feeder_name option:selected').text())
     if ($('#feeder_name option:selected').text()=="Incommer") {
         $('#isIncommer').val('true');
@@ -3413,16 +3521,16 @@ $.ajax({
         },
         success:function(response){
             console.log(response)
-
+            $('#latest_entry').text('');
             // $('#station_id').val(station_id)
             // $('#station_type').val("TS")
             var last_reading=JSON.parse(response);
            
             var latest_entry="";
                 
-                     $('#latest_entry').text('');
+                     
                     
-                 latest_entry=last_reading?"Latest entry date: "+moment(last_reading.created_at).format("DD-MM-YYYY")+" | Hour: "+last_reading.hour+".00":"";
+                 latest_entry=last_reading?"Latest entry date(d-m-Y): "+moment(last_reading.captured_at).format("DD-MM-YYYY")+" | Hour: "+last_reading.hour+".00":"";
                 $('#latest_entry').text(latest_entry)
              }
          })
@@ -3541,6 +3649,140 @@ $('#zone_map').change(function(){
     })
 })
   
+
+//block user
+$(document).on('click','.block_user',function(){
+    var id=$(this).attr('id');
+    var url=BASE_URL+"admin/block_user";
+    Swal.fire({
+  title: 'Are you sure?',
+  text: "You want to block user",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then((result) => {
+  if (result.value) {
+    
+        $('#'+id).attr('disabled',true)
+        $('#'+id).html('<span class="fa fa-spinner fa-pulse"></span> Processing...' )
+     $.ajax({
+        url:url,
+        type:'POST',
+        data:{user_id:id},
+        success:function(response){
+            console.log(response)
+            var data=JSON.parse(response);
+            if (data.status) {
+                Swal.fire({
+                  position: 'top-end',
+                  type: 'success',
+                  title: "User is blocked successfully",
+                  showConfirmButton: false,
+                  timer: 2500
+                });
+                $('#'+id).attr('disabled',false)
+                $('#'+id).removeClass("block_user");
+                $('#'+id).addClass("unblock_user");
+                $('#'+id).html("Unblock");
+                //location.reload();
+            }else{
+                Swal.fire({
+                  position: 'top-end',
+                  type: 'error',
+                  title: data.message,
+                  showConfirmButton: false,
+                  timer: 2000
+                });
+                $('#'+id).attr('disabled',false)
+                $('#'+id).html('Block')
+            }
+        },
+        error:function(error){
+            console.log(error)
+            console.log(url)
+            Swal.fire({
+                  position: 'top-end',
+                  type: 'error',
+                  title: "Oops Error occured!",
+                  showConfirmButton: false,
+                  timer: 1500
+                });
+            $('#'+id).attr('disabled',false)
+            $('#'+id).html('Block')
+        }
+     })   
+    }
+    })
+})
+//unblock user
+$(document).on('click','.unblock_user',function(){
+    var id=$(this).attr('id');
+    var url=BASE_URL+"admin/unblock_user";
+    Swal.fire({
+  title: 'Are you sure?',
+  text: "You want to unblock user",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then((result) => {
+  if (result.value) {
+    
+        $('#'+id).attr('disabled',true)
+        $('#'+id).html('<span class="fa fa-spinner fa-pulse"></span> Processing...' )
+     $.ajax({
+        url:url,
+        type:'POST',
+        data:{user_id:id},
+        success:function(response){
+            console.log(response)
+            var data=JSON.parse(response);
+            if (data.status) {
+                Swal.fire({
+                  position: 'top-end',
+                  type: 'success',
+                  title: "User is unblocked successfully",
+                  showConfirmButton: false,
+                  timer: 2500
+                });
+                $('#'+id).attr('disabled',false)
+                $('#'+id).removeClass("unblock_user");
+                $('#'+id).addClass("block_user");
+                $('#'+id).html("Block");
+                //location.reload();
+            }else{
+                Swal.fire({
+                  position: 'top-end',
+                  type: 'error',
+                  title: data.message,
+                  showConfirmButton: false,
+                  timer: 2000
+                });
+                $('#'+id).attr('disabled',false)
+                $('#'+id).html('UnBlock')
+            }
+        },
+        error:function(error){
+            console.log(error)
+            console.log(url)
+            Swal.fire({
+                  position: 'top-end',
+                  type: 'error',
+                  title: "Oops Error occured!",
+                  showConfirmButton: false,
+                  timer: 1500
+                });
+            $('#'+id).attr('disabled',false)
+            $('#'+id).html('UnBlock')
+        }
+     })   
+    }
+    })
+})
+
 $('#voltage_level_map').change(function(){
     var zone_id=$('#zone_map').val();
     var voltage_level=$(this).val();
@@ -3640,6 +3882,8 @@ $('#myTable').DataTable({
            
     ]
 });
+
+ $(".main-table").clone(true).appendTo('#table-scroll').addClass('clone'); 
 $('#activity_tablesa').DataTable({
   "order": [[ 0, "desc" ]],
     dom: 'Bfrtip',
@@ -3697,10 +3941,37 @@ $('#simpleTable1').DataTable({
            
         ]
     } );
+$('#simpleTable3').DataTable({
+        "order": [[ 1, "desc" ]],
+         dom: 'Bfrtip',
+        buttons: [
+               {
+                extend:    'copyHtml5',
+                text:      '<i class="fa fa-files-o"></i>',
+                titleAttr: 'Copy'
+            },
+            {
+                extend:    'excelHtml5',
+                text:      '<i class="fa fa-file-excel-o"></i>',
+                titleAttr: 'Excel'
+            },
+            {
+                extend:    'csvHtml5',
+                text:      '<i class="fa fa-file-text-o"></i>',
+                titleAttr: 'CSV'
+            },
+            {
+                extend:    'pdfHtml5',
+                text:      '<i class="fa fa-file-pdf-o"></i>',
+                titleAttr: 'PDF'
+            }
+           
+        ]
+    } );
 
 
 $('#simpleTable2').DataTable({
-        "order": [[ 4, "desc" ]],
+        "order": [[ 1, "desc" ]],
          dom: 'Bfrtip',
         buttons: [
                {
@@ -3936,6 +4207,28 @@ function updateTableTotals() {
     $('input', this).last().val(total.toFixed(2));
   });
 };
+
+function maxColumnValue(){
+  //this function colour code the maximum value in column
+  var cols = []
+  var trs = $('#table_sum tr')
+  var data =$.each(trs , function(index, tr){
+    $.each($(tr).find("td").not(":first"), function(index, td){
+      cols[index] = cols[index] || [];
+      cols[index].push($(td).text())
+    })
+  });
+  cols.forEach(function(col, index){
+    var max = Math.max.apply(null, col);
+    var min = Math.min.apply(null, col)
+    $('#table_sum tr').find('td:eq('+(index+1)+')').each(function(i, td){
+      $(td).toggleClass('max', +$(td).text() === max)
+      $(td).toggleClass('min', +$(td).text() === min)  
+    })
+  })
+}
+
+// maxColumnValue()
 
 
 updateTableTotals();

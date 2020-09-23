@@ -48,6 +48,7 @@ class FaultResponse_model extends CI_Model
 		
 		return $query->row();
 	}
+	
 	public function get_outages($data){
 		$this->db->select("fault_responses.*,fa.indicator as indicator,transm.tsname as transmission,iss.iss_names as iss_name,trans.names_trans as transformer,fd.feeder_name as feeder_name,fd_33.feeder_name as feeder33_name,fd_11.feeder_name as feeder11_name,transmN.tsname as transmissionN,issN.iss_names as iss_nameN,transfN.names_trans as transformerN");
 		$this->db->from("fault_responses");

@@ -14,21 +14,30 @@
              <div class="col-md-4 ts_div_log" id="">
 
             <label> Report Type</label>
-                <select class="form-control" name="report_type" id="">
+                <select class="form-control" name="report_type" id="report_type_fault">
                  <option>Summary</option>
                  
-                 <option value="interruption">Interruption Report</option>
-                 <option value="programe_sheet">Programme Sheet</option>
+                 <!-- <option value="interruption">Interruption Report</option>
+                 <option value="programe_sheet">Programme Sheet</option> -->
                   </select>
               </div>
   
+              <div class="col-md-3" id="status_div">
 
+            <label> Status</label>
+                <select class="form-control" name="status" id="">
+                 <option value="all">All</option>
+                 
+                 <option value="opened">Opened</option>
+                 <option value="closed">Closed</option>
+                  </select>
+              </div>
            
                <div class="col-md-3">
                
-              <label class="col-form-label" for="date_picker"> Choose Date</label>
+              <label class="col-form-label" for="date_picker"> Choose Month</label>
               <div class="" style="position: relative !important;">
-                  <input placeholder="Choose date" class="form-control date_picker" style="color: #333" type="text" name="date"  autocomplete="off" id="date_picker" />
+                  <input placeholder="Choose month" class="form-control date_picker" style="color: #333" type="text" name="date"  autocomplete="off" id="date_picker" />
                
               
               </div>
@@ -60,10 +69,12 @@
                                     
                                   if ($user->role_id==8) {
                                     # dso
+
                                     ?>
                                     <table id="myTable" class="table table-bordered">
                            <thead>
                              <th>S/N</th>
+                             <th>Status</th>
                              <th>Name of Feeder</th>
                              <th>Time and date of fault</th>
                              <th>Indication</th>
@@ -76,10 +87,27 @@
                            </thead>
                            <tbody>
                              <?php
-                              foreach ($report_11kv as $key => $value) {
+                              foreach ($report as $key => $value) {
                                ?>
                                <tr>
                                  <td><?= $key+1 ?></td>
+                                  <td>
+                                  <?php
+                                    if (empty($value->date_closed)) {
+                                      ?>
+                                      <span class="text-danger" style="font-weight: bold;">Open</span>
+
+                                      <?php
+                                    } else {
+                                      ?>
+                                      <span class="text-success" style="font-weight: bold;">Closed</span>
+                                      <?php
+                                      # code...
+                                    }
+                                    
+                                  ?>
+                                    
+                                  </td>
                                   <td style="font-size: 11px">
                     <?php
                       if ($value->category=="Transmission station") {
@@ -106,7 +134,7 @@
                   <td><?= $value->indicator; ?></td>
                   <td><?= $value->fault_cause ?></td>
                   <td><?= $value->location ?></td>
-                  <td></td>
+                  <td><?= $value->report ?></td>
                   <td><?= $value->date_closed ?></td>
                   <td><?php
                   if (!empty($value->date_closed)) {
@@ -151,10 +179,12 @@ echo $timediff->h;
                     </ul>
                     <div class="tab-content" id="myTabContent">
                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                                     <table id="myTable" class="table table-bordered">
+                        <table id="myTable" class="table table-bordered table-responsive">
                            <thead>
                              <th>S/N</th>
+                             <th>Status</th>
                              <th>Name of Feeder</th>
+                             <th>Entered By</th>
                              <th>Time and date of fault</th>
                              <th>Indication</th>
                              <th>Cause of Fault</th>
@@ -170,6 +200,23 @@ echo $timediff->h;
                                ?>
                                <tr>
                                  <td><?= $key+1 ?></td>
+                                 <td>
+                                  <?php
+                                    if (empty($value->date_closed)) {
+                                      ?>
+                                      <span class="text-danger" style="font-weight: bold;">Open</span>
+
+                                      <?php
+                                    } else {
+                                      ?>
+                                      <span class="text-success" style="font-weight: bold;">Closed</span>
+                                      <?php
+                                      # code...
+                                    }
+                                    
+                                  ?>
+                                    
+                                  </td>
                                   <td style="font-size: 11px">
                     <?php
                       if ($value->category=="Transmission station") {
@@ -192,12 +239,13 @@ echo $timediff->h;
                       }
                     ?>
                   </td>
+                  <td class="td"><?= $value->oro_f.' '.$value->oro_l; ?></td>
                   <td class="td"><?= $value->outage_date; ?></td>
                   <td><?= $value->indicator; ?></td>
-                  <td><?= $value->fault_cause ?></td>
+                  <td><?= empty($value->fault_cause)?'-':$value->fault_cause ?></td>
                   <td><?= $value->location ?></td>
-                  <td></td>
-                  <td><?= $value->date_closed ?></td>
+                  <td><?= empty($value->report)?'-':$value->report ?></td>
+                  <td><?= empty($value->date_closed)?'-':$value->date_closed ?></td>
                   <td><?php
                   if (!empty($value->date_closed)) {
                     $start = strtotime($value->outage_date);
@@ -224,10 +272,12 @@ echo $timediff->h;
                        </div>
 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
 
-            <table id="myTable" class="table table-bordered">
+            <table id="myTable" class="table table-bordered table-responsive">
                            <thead>
                              <th>S/N</th>
+                             <th>Status</th>
                              <th>Name of Feeder</th>
+                             <th>Entered By</th>
                              <th>Time and date of fault</th>
                              <th>Indication</th>
                              <th>Cause of Fault</th>
@@ -243,6 +293,24 @@ echo $timediff->h;
                                ?>
                                <tr>
                                  <td><?= $key+1 ?></td>
+
+                                 <td>
+                                  <?php
+                                    if (empty($value->date_closed)) {
+                                      ?>
+                                      <span class="text-danger" style="font-weight: bold;">Open</span>
+
+                                      <?php
+                                    } else {
+                                      ?>
+                                      <span class="text-success" style="font-weight: bold;">Closed</span>
+                                      <?php
+                                      # code...
+                                    }
+                                    
+                                  ?>
+                                    
+                                  </td>
                                   <td style="font-size: 11px">
                     <?php
                       if ($value->category=="Transmission station") {
@@ -265,12 +333,13 @@ echo $timediff->h;
                       }
                     ?>
                   </td>
+                  <td class="td"><?= $value->oro_f.' '.$value->oro_l; ?></td>
                   <td class="td"><?= $value->outage_date; ?></td>
                   <td><?= $value->indicator; ?></td>
-                  <td><?= $value->fault_cause ?></td>
+                 <td><?= empty($value->fault_cause)?'-':$value->fault_cause ?></td>
                   <td><?= $value->location ?></td>
-                  <td></td>
-                  <td><?= $value->date_closed ?></td>
+                  <td><?= empty($value->report)?'-':$value->report ?></td>
+                  <td><?= empty($value->date_closed)?'-':$value->date_closed ?></td>
                   <td><?php
                   if (!empty($value->date_closed)) {
                     $start = strtotime($value->outage_date);

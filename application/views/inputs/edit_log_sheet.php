@@ -28,7 +28,7 @@
             
       <div class="col-md-4 iss_log_div" id="" style="">
 <label>Injection Substation</label>
-<select class="form-control" name="iss_name" id="iss_name">
+<select class="form-control" style="width: 100%" name="iss_name" id="iss_name">
     <option value="">Injection Substation</option>
     <option value="<?= $station->id ?>"><?= $station->iss_names ?></option>
    
@@ -128,7 +128,7 @@
             
     <div class="col-md-4 iss_log_div" id="" style="display: none">
 <label>Injection Substation</label>
-<select class="form-control" name="iss_name" id="iss_name">
+<select class="form-control" style="width: 100%" name="iss_name" id="iss_name">
     <option value="">Injection Substation</option>
     <?php
         foreach ($iss_data as $key => $value) {
@@ -145,7 +145,7 @@
 <div class="col-md-4 iss_log_div" id="" style="display: none">
 
     <label>Power Transformer</label>
-    <select class="form-control" name="transformer_iss" id="transformer_iss">
+    <select class="form-control" style="width: 100%" name="transformer_iss" id="transformer_iss">
     <option value="">No Transformer data</option>
                 
     </select>
@@ -337,6 +337,7 @@
           <div class="modal-body">
             <form class="update-reading" id="<?= $report->id ?>">
                  <input type="hidden" value="<?= $feeder_name ?>" name="feeder_name">
+                 <input type="hidden" value="<?= $feeder_id ?>" name="feeder_id">
                 <input type="hidden" value="<?= $report->id ?>" name="reading_id">
                 <input type="hidden" value="<?= $log_type ?>" name="type">
                  <input type="hidden" value="0" name="isIncommer">
@@ -352,6 +353,7 @@
 
                         <?php
                       }
+                      echo '<option  value="on">ON</option>';
                         foreach ($status as $key => $feeder_status) {
                           ?>
 

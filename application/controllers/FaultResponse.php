@@ -77,7 +77,7 @@ class FaultResponse extends MY_Controller
 		}elseif ($user->role_id==35) {
 			# transmission dso
 			$data['outages']=$this->FaultResponse_model->get_outages(["fault_responses.voltage_level"=>"33kv","fault_responses.station_id"=>$user->transmission_id,"status <"=>8]);
-		}
+		}	
 
 		
 		$data['faults']=$this->planned_model->get_fault_causes();
@@ -216,7 +216,6 @@ class FaultResponse extends MY_Controller
 	}
 
 	public function store_fault_response_request(){
-		//var_dump($this->input->post("department"));
 		$department=$this->input->post("department");
 		//asset name can be Transmission station or injection sub station
 		if ($this->input->post('asset_name')=="TS") {
@@ -225,7 +224,7 @@ class FaultResponse extends MY_Controller
 				$station_id=$this->input->post('trans_st');
 				$voltage_level="33kv";
 				$status_message="Waiting for ".$department." acknowledgement...";
-				$message="You have a Fault response acknowledgement.Please go to noms platform for acknowledgement and BOQ preparation... ";
+				//$message="You have a Fault response acknowledgement.Please go to noms platform for acknowledgement and BOQ preparation... ";
 				$status=2;
 				if ($this->input->post('transmission_fault')==1) {
 					//is  a transmission fault so set status=7,which means
@@ -253,9 +252,9 @@ class FaultResponse extends MY_Controller
 			} else {
 				$station_id=$this->input->post('iss_name');
 				$voltage_level="11kv";
-				$status_message="Waiting for docx upload...";
+				$status_message="Waiting ". $department." Coordnitor acknowledgement and BOQ preparation";
 				$status=2;
-				$message="You have Fault response request... ";
+				//$message="You have Fault response request... ";
 				if ($this->input->post('transmission_fault')==1) {
 					//is  a transmission fault so set status=8,which means
 					$status=7;
@@ -293,7 +292,8 @@ class FaultResponse extends MY_Controller
 			}else{
 				$response="Rapid";
 			}
-			$outage_id='NOMS'.substr($this->uniqueId(),0,5);
+
+			$outage_id=$this->uniqueId();
 			$insert_data=array("station_id"=>$station_id,"transformer_id"=>$transformer,"feeder_id"=>$this->input->post('feeder_id'),'remarks'=>trim($this->input->post('remarks')),'voltage_level'=>$voltage_level,"created_by"=>$this->session->userdata('USER_ID'),"outage_id"=>$outage_id,"status_message"=>$status_message,"status"=>$status,"type_response"=>$this->input->post("type_response"),"reason_id"=>$this->input->post("reason_id"),"duration"=>$this->input->post("duration"),"department"=>$department,"outage_date"=>$this->input->post("outage_date"),"transmission_fault"=>$this->input->post("transmission_fault"),"category"=>$category,"equipment_id"=>$equipment,"end_date"=>$end_date,"load_loss"=>$this->input->post('load_loss'));
 			//var_dump($insert_data);
 
@@ -305,7 +305,7 @@ class FaultResponse extends MY_Controller
 				$outage=$this->FaultResponse_model->get_outage($outage_id);
 				//get name of equipment
 					//get name of equipment
-				$item=$this->getEquipmentName($outage->category,$outage->equipment_id);
+				$item=$this->getEquipmentName($category,$equipment);
 
 
 				if ($voltage_level=="33kv") {
@@ -317,20 +317,25 @@ class FaultResponse extends MY_Controller
 					
 
 					//get feeder manager
-
+					//check if it is a feeder the asssign
+					if ($category=="Feeder") {
+						# code...
+					
 					$feeder_manager=$this->admin_model->get_feeder_manager($equipment,"33kv");
+				}
 				} else {
 					//11kv
 
 					//get zone by iss
-					$zone_id=$this->admin_model->get_zone_by_iss($station_id);
+					$zone_id=$this->admin_model->get_zone_by_iss($station_id)->zone_id;
 
 
 					//get zonal manager
 
+					if ($category=="Feeder") {
 					//get feeder manager
 					$feeder_manager=$this->admin_model->get_feeder_manager($equipment,"11kv");
-
+				}
 					//get network manager
 					
 					}
@@ -355,8 +360,8 @@ class FaultResponse extends MY_Controller
 					$hso=$this->admin_model->get_users_by_role(11);
 
 
-					$message="Hello, FAULT ID:".$outage->outage_id.".  
-A fault (type of fault) has just be logged against ".$item." on ".$outage->outage_date.". Please mobilise for resolution immediately. For more info, call the Dispatch Team on 
+					$message="Hello, FAULT ID: ".$outage->outage_id.". 
+A fault has just be logged against ".$item." on ".$outage->outage_date.". Please mobilise for resolution immediately. For more info, call the Dispatch Team on 
 ".$corrd_dispatch[0]->phone;
 
 					if(isset($network_manager)){
@@ -373,17 +378,21 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 					}
 				} 
 				if (isset($feeder_manager)) {
-					//foreach ($feeder_manager as $key => $user) {
-				array_push($dataX, ["email"=>$feeder_manager->email,"phone"=>$feeder_manager->phone,"message"=>$message,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$feeder_manager->last_name]);	
-					//}
+					foreach ($feeder_manager as $key => $user) {
+				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>$message,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);	
+					}
 				}
 
 				foreach ($hso as $key => $user) { 
 							
 						array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>$message,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
 						} 
-
-							
+						$message_st='Hello '.$outage_id.' A forced outage  has just been noted against '.$item.'  on '.$outage->outage_date.'. Kindly note that efforts are already on to resolve it. Regards. PHED';
+						$static_users=$this->admin_model->get_static_contacts();
+					foreach ($static_users as $key => $user) { 
+							 
+						array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>$message_st,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->name]);
+						}	
 				
 				
 					//check if fault is a transmission fault or not
@@ -394,7 +403,8 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 						
 					} else {
 						#not a transmission fault
-
+						$message="Hello, FAULT ID: ".$outage->outage_id.". 
+A fault has just be logged against ".$item." on ".$outage->outage_date.". Please mobilise for resolution immediately.Kindly click on ".base_url()." to acknowledge.";
 
 						//get the department to fix fault
 					$users=$this->admin_model->get_users_by_role($department);
@@ -411,35 +421,29 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 							$this->job_model->addToJob($dataX);
 							//$this->sendSMS(array("phone"=>implode(',', $sms_users),"message"=>$message));
 						}
-
 						//get the enumeration code.. per asset
 						$assetId="";
 						$assetType="";
 						if ($category=="Feeder") {
 							if ($voltage_level=="33kv") {
-								var_dump($outage);
-								
-								if (null!==$this->admin_model->get_feeder33kv_by_id($outage->equipment_id)) {
-									$assetId=$this->admin_model->get_feeder33kv_by_id($outage->equipment_id)->enum_id;
-									$assetType="FEEDER33ID";
+								$assetId=$this->admin_model->get_feeder33kv_by_id($outage->equipment_id)->enum_id;
+								if ($assetId!=0) {
+									$assetId=$assetId;
 								} else {
 									$assetId="";
 								}
 								
-								//$assetId=($assetId==0)?"":$assetId;
-								
+								// $assetId=($assetId==0)?"":$assetId;
+								$assetType="FEEDER33ID";
 							}else {
 							# 11kv
-								if (null !==$this->admin_model->get_feeder11kv_by_id($outage->equipment_id)) {
-									$assetId=$this->admin_model->get_feeder11kv_by_id($outage->equipment_id)->enum_id;
-									$assetType="FEEDER11ID";
+							$assetId=$this->admin_model->get_feeder11kv_by_id($outage->equipment_id)->enum_id;
+							if ($assetId!=0) {
+									$assetId=$assetId;
 								} else {
 									$assetId="";
 								}
-								
-							
-							$assetId=($assetId==0)?"":$assetId;
-							//$assetType="FEEDER11ID";
+							$assetType="FEEDER11ID";
 						}
 						} elseif ($category=="Transformer") {
 							$assetType="INJID";
@@ -450,9 +454,7 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 						}else{
 							//transmission
 						}
-						
-
-					echo json_encode(["status"=>true,"outage_id"=>$outage_id,"assetId"=>$assetId,"voltage_level"=>$outage->voltage_level,"category"=>$outage->category,"assetType"=>$assetType]);	
+					echo json_encode(["status"=>true,"outage_id"=>$outage_id,"assetId"=>$assetId,"voltage_level"=>$outage->voltage_level,"category"=>$outage->category,"assetType"=>$assetType]);
 			} else {
 				echo json_encode($result);
 			}
@@ -462,11 +464,11 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 
 	public function store_customers_contact(){
 		$outage_id=$this->input->post("outage_id");
-		var_dump($outage_id);
+		//var_dump($outage_id);
 		$outage=$this->FaultResponse_model->get_outage($outage_id);
 		$item=$this->getEquipmentName($outage->category,$outage->equipment_id);
 
-		$message='Hello '.$outage_id.' An unplanned outage  has just be noted against '.$item.' powering your premise on '.$outage->outage_date.'. Kindly note that efforts are already on to resolve it. Regards. PHED Dispatch Team';
+		$message='Hello '.$outage_id.' A fault has just been noted against '.$item.' powering your premise on '.$outage->outage_date.'. Kindly note that efforts are already on to resolve it. Regards. PHED';
 		$response=json_decode($this->input->post("records"));
 		//var_dump($response);
 		$dataX=array();
@@ -630,10 +632,10 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 		if ($category=="Feeder") {
 					$item=$this->admin_model->get_feeder_by_id($equipment_id)->feeder_name;
 				}elseif ($category=="Transformer") {
-					$item=$this->input_model->get_transformer_by_id($equipment_id)->names_trans;
+					$item=$this->admin_model->get_transformer_by_id($equipment_id)->names_trans;
 				}elseif ($category=="Injection substation") {
 					$item=$this->input_model->get_iss_id($equipment_id)->iss_names;
-				}elseif ($outage->category=="Transmission station") {
+				}elseif ($category=="Transmission station") {
 					$item=$this->input_model->get_transmission_id($equipment_id)->tsname;
 				}
 				return $item;
@@ -721,7 +723,7 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 					//11kv
 
 					//get zone by iss
-					$zone_id=$this->admin_model->get_zone_by_iss($outage->station_id);
+					$zone_id=$this->admin_model->get_zone_by_iss($outage->station_id)->zone_id;
 
 
 					//get zonal manager
@@ -732,6 +734,9 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 					//get network manager
 					
 					}
+
+					// var_dump($zone_id);
+					// return;
 
 					$zonal_manager=$this->admin_model->get_users_by_zone_role($zone_id,24);
 
@@ -766,10 +771,10 @@ A fault (type of fault) has just be logged against ".$item." on ".$outage->outag
 								}
 							}
 							if(isset($feeder_manager)){
-								//foreach ($feeder_manager as $key => $user) { 
+								foreach ($feeder_manager as $key => $user) { 
 							
-							array_push($dataX, ["email"=>$feeder_manager->email,"phone"=>$feeder_manager->phone,"message"=>$message,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$feeder_manager->last_name]);
-							//}
+							array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>$message,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+							}
 							}
 			
 			if ($corrd_dispatch) {

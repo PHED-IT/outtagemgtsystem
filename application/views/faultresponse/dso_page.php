@@ -1,4 +1,4 @@
-
+  
               <div class="card">
                 <div class="card-header">
                   <h4>DSO Fault/Rapid Response</h4>
@@ -30,6 +30,9 @@
                     </thead>
                     <tbody>
       <?php
+      if (isset($outages)) {
+        
+      
           foreach ($outages as $outage) {
               ?>
               <tr>
@@ -87,13 +90,10 @@
                 title=" Acknowledge"><span class="fa fa-flash"></span></button>
                 <?php
                 //if status is 7 it means fault is due to be closed
-                  if ($outage->status==7) {
-                    ?>
+                 ?>
                      <button  class=" btn-danger" id="btn<?= $outage->outage_id ?>" data-toggle="modal" data-target="#Closemodal<?= $outage->outage_id ?>" data-placement="bottom"
                 title=" Close fault request">Closure</button>
-                    <?php
-                  }
-                ?>
+                   
 
 
 
@@ -113,9 +113,9 @@
                  <div class="row">
                    <div class="col-md-12">
                         
-                        <label class=" col-form-label " for="reading"> Cause of Fault</label>
+                        <label class=" col-form-label " style="display: block;" for="reading"> Cause of Fault</label>
                         
-                        <select class="form-control" name="fault_cause">
+                        <select class="form-control" style="display: block;width: 100%" name="fault_cause">
                           <?php 
                             foreach ($faults as $key => $value) {
                               ?>
@@ -241,6 +241,11 @@
               </tr>
               <?php
           }
+
+        }
+        else{
+          echo "<p class='text-danger'>You are not a DSO </p>";
+        }
       ?>
                       </tbody>
                                    

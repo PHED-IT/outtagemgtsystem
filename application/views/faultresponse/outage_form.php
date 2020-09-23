@@ -92,7 +92,7 @@
               </select>
               </div>
               <div class="col-md-4"> 
-              <label class="col-form-label" for=""> Load Loss</label>
+              <label class="col-form-label" for=""> Load Loss(AMP)</label>
               <input type="text" name="load_loss" class="form-control">
               </div> 
             </div>

@@ -1,5 +1,19 @@
   <div class="alert alert-success">
     Hi <?= $user->last_name ?>! You are a/an <?= $user->role_name ?> 
+    <?php
+    if ($user->role_id==8) {
+      # dso
+      echo "<span class='text text-danger'> | Station: ".$user->iss_names.'</span>';
+
+    }elseif ($user->role_id==12) {
+      # feeder manager
+
+      echo "<span class='text text-danger'> |  ".$user->feeder_name.'</span>';
+    }elseif ($user->role_id==35) {
+      //Transmission dso
+       echo "<span class='text text-danger'> | Station: ".$user->tsname.'</span>';
+    }
+    ?>
   </div>
 <div class="row">
 

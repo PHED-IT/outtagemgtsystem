@@ -1,7 +1,7 @@
 
                             <div class="card" >
                                <div class="card-header">
-                                <h4>Edit Log Sheet</h4>
+                                <h4>Edit Energy Sheet</h4>
                                </div>
                                <div class="card-body">
                                 <!-- <h5 class="box-title mr-b-0">Horizontal Form</h5>
@@ -198,7 +198,7 @@
                       <div class="col-md-12">
                       <button id="btn<?= $reading_incommer->id ?>" class="btn btn-primary btn-rounded mr-5" type="submit">Edit</button>
                       <?php
-                      if ($user->role_id==1 ||$user->role_id==22) {
+                      if ($user->role_id==1 ||$user->role_id==22 || $user->role_id==17) {
                         # user is admin or coordinator dispatch
                       ?>
                       <button type="button" id="btnn<?= $reading_incommer->id ?>" data-type="<?= $log_type ?>" data-id="<?= $reading_incommer->id ?>" class="btn btn-warning btn-rounded delete_reading" type="submit">Delete</button>
@@ -271,7 +271,12 @@
                     <div class="row">
                       <div class="col-md-12">
                       <button id="btn<?= $reading_feeder->id ?>" class="btn btn-primary btn-rounded mr-5" type="submit">Edit</button>
+                      <?php
+                      if ($user->role_id==1 ||$user->role_id==22 || $user->role_id==17) {
+                        # user is admin or coordinator dispatch
+                      ?>
                       <button type="button" id="btnn<?= $reading_feeder->id ?>" data-type="<?= $log_type ?>" data-id="<?= $reading_feeder->id ?>" class="btn btn-warning btn-rounded delete_reading" type="submit">Delete</button>
+                    <?php } ?>
                     </div>
                     </div>
                         

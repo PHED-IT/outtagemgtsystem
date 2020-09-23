@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 
  */
-class Admin_model extends CI_Model
+class Admin_model extends MY_Model
 {
 	
 	protected $user_table="users";
@@ -59,6 +59,14 @@ class Admin_model extends CI_Model
 		}
 		}	
 		
+	}
+
+	public function get_33kvfeeders_by_zone($zone_id){
+		$this->db->from("feeders_33kv");
+		//$query=$this->db->get("feeders_33kv");
+		$this->db->join("feeder33_zones fed","fed.feeder_id=feeders_33kv.id and zone_id=$zone_id");
+		$query=$this->db->get();
+		return $query->result();
 	}
 
 	public function create_role_menu($data){
@@ -233,11 +241,14 @@ class Admin_model extends CI_Model
 	}
 	public function add_feeder_zone($data){
 		
-		$count_item=count($data['feeder_id_11']);
+		$count_item=count($data['feeders']);
 		for ($i=0; $i <$count_item ; $i++) { 
-			$feeder_id_11=$data['feeder_id_11'][$i];
+			$feeder_id=$data['feeders'][$i];
 			
-				$result=$this->db->insert("feeder11_zones",array("feeder_id"=>$feeder_id_11,'zone_id'=>$data['zone_id'],'iss_id'=>$data['iss_id'],"sub_zone_id"=>$data['sub_zone_id'],"feeder_33kv_id"=>$data['feeder_id_33']));
+				//delete first before inserting
+			$this->db->query("delete  from feeder33_zones where feeder_id='".$feeder_id."'");
+				//$this->db->delete("feeder33_zones",array("feeder_id",$feeder_id));
+				$result=$this->db->insert("feeder33_zones",array("feeder_id"=>$feeder_id,'zone_id'=>$data['zone_id'],'voltage_level'=>"33kv"));
 			
 		}
 		if ($result) {
@@ -268,6 +279,10 @@ class Admin_model extends CI_Model
 		$query=$this->db->get("ibc");
 		return $query->result();
 	}
+	public function get_static_contacts(){
+		$query=$this->db->get("static_contacts");
+		return $query->result();
+	}
 
 	public function get_feeder_33kv_by_11kv($feeder_id){
 		$this->db->from("feeders_11kv");
@@ -278,39 +293,79 @@ class Admin_model extends CI_Model
 	}
 	public function get_feeder_manager($feeder_id,$voltage_level){
 		if ($voltage_level=="33kv") {
-			$query=$this->db->get_where("users",array("feeder33kv_id"=>$feeder_id));
-		return $query->row();
+			$query=$this->db->get_where("users",array("feeder33kv_id"=>$feeder_id,"blocked"=>0));
+		return $query->result();
 		} else {
 			//get all the feeders 
 			$feeders_33kv=$this->get_feeder_33kv_by_11kv($feeder_id)->feeder33;
-			$query=$this->db->get_where("users",array("feeder33kv_id"=>$feeders_33kv));
-		return $query->row();
+			$query=$this->db->get_where("users",array("feeder33kv_id"=>$feeders_33kv,"blocked"=>0));
+		return $query->result();
 		}
 		
 	}
-	public function get_zones(){
-		$query=$this->db->get("zones");
+	
+	public function get_iss_enumeration(){
+		$query=$this->db->get("iss_enumeration");
+		return $query->result();
+	}
+
+	public function get_feeder_zones(){
+		//var_dump($data);
+		$data='<thead style="background-color:blue;color:white"><tr>';
+		$data.='<th style="border:1px solid #000">ZONE</th>';
+		$data.='<th>33KV FEEDER</th>';
+		$data.='<th></th>';
+		
+		
+		$data.='</tr></thead><tbody>';
+		foreach ($this->get_zones() as $key => $zone) {
+			//var_dump($this->get_all_fault_equipments($input,$zone->id));
+			$data.='<tr>';
+			$data.='<tr>';
+			$count=count($this->get_33kvfeeders_by_zone($zone->id))+1;
+			$data.='<td style="border:1px solid #000;color:#000;background-color:#278acd;font-weight:bold" rowspan="'.$count.'">';
+			//$data.='<a href="" style="color:white;margin-right:5px">Edit</a>';
+			$data.=$zone->name;
+              $data.='</td>';
+              $data.='</tr>';
+		foreach ($this->get_33kvfeeders_by_zone($zone->id) as $key => $asset) {
+			$data.='<tr>';
+			$data.='<td style="border:1px solid #ddd;color:#000;background-color:#f2642a;font-weight:bold">';
+			$data.=$asset->feeder_name;
+              $data.='</td>';
+			
+			
+			// $data.='<td style="background-color:#d0d0d0;text-align:right">55</td>';
+			// $data.='</tr>';	
+		}
+		//$data.='<tr>';
+			
+			
+             // $data.='</tr>';
+
+		$data.='</tr>';
+	}
+		$data.='</tbody>';
+
+		return $data;
+	}
+	public function get_iss_by_state($state){
+		
+		$this->db->select("iss_tables.iss_names,iss_tables.iss_coord,iss_tables.id");
+		$this->db->from("zones");
+		$this->db->join("feeder33kv_iss fdt","fdt.zone_id=zones.id and zones.state_id=$state");
+		$this->db->join("iss_tables","iss_tables.id=fdt.iss_id and iss_tables.iss_coord is not null");
+		$query=$this->db->get();
 		return $query->result();
 	}
 	public function get_sub_zones(){
 		$query=$this->db->get("sub_zones");
 		return $query->result();
 	}
-	public function get_feeders($data){
-		if ($data['voltage_level']=="33kv") {
-			$query=$this->db->get("feeders_33kv");
-		} else {
-			$query=$this->db->get("feeders_11kv");
-		}
-		
-		//$this->db->where($data);
-		
-
-		return $query->result();
-	}
+	
 	public function get_transformer_iss($data){
 
-		$query=$this->db->get_where("transformers",array("iss_id"=>$data["st_id"],"asset_type"=>$data["asset_type"]));
+		$query=$this->db->get_where("transformers",array("iss_id"=>$data["st_id"]));
 		return $query->result();
 	}
 	//this function gets all transformer for a transmission station
@@ -369,16 +424,19 @@ class Admin_model extends CI_Model
 		$this->db->where(array('zone_id'=>$zone_id,'role_id'=>$role));
 		$query=$this->db->get($this->user_table);
 		return $query->result();
+
 	}
 
 	public function get_zone_by_iss($iss_id){
 		$this->db->where(array('iss_id'=>$iss_id));
 		$query=$this->db->get("feeder33kv_iss");
 		return $query->row();
+
+
 	}
 
 	public function get_users_by_role($role){
-		$this->db->where(array('role_id'=>$role));
+		$this->db->where(array('role_id'=>$role,"blocked"=>0));
 		$query=$this->db->get($this->user_table);
 		return $query->result();
 	}
@@ -637,9 +695,12 @@ class Admin_model extends CI_Model
 	}
 	public function get_user($user_id){
 		
-		$this->db->select('*')->from($this->user_table);
+		$this->db->select('users.*,roles.role_name,iss_tables.iss_names,feeders_33kv.feeder_name,transmissions.tsname')->from($this->user_table);
 		$this->db->where('users.id',$user_id);
 		$this->db->join($this->role_table,'roles.id=users.role_id');
+		$this->db->join("iss_tables",'iss_tables.id=users.iss',"left",false);
+		$this->db->join("feeders_33kv",'feeders_33kv.id=users.feeder33kv_id',"left",false);
+		$this->db->join("transmissions",'transmissions.id=users.transmission_id',"left",false);
 		$query=$this->db->get();
 		//print_r($query);
 		return $query->row();

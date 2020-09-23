@@ -7,10 +7,10 @@ class Planned extends MY_Controller
 {
 	public function outage_req_officer(){
 		
-		$data['outages']=$this->planned_model->get_outage_all(["created_by"=>$this->session->userdata('USER_ID'),"status !="=>7,"planned_outages.voltage_level"=>"33kv"],'33kv');
-		$data['outages_11kv']=$this->planned_model->get_outage_all(["created_by"=>$this->session->userdata('USER_ID'),"status !="=>7,"planned_outages.voltage_level"=>"11kv"],'11kv');
+		$data['outages']=$this->planned_model->get_outage_all(["created_by"=>$this->session->userdata('USER_ID'),"outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"33kv"],'33kv');
+		$data['outages_11kv']=$this->planned_model->get_outage_all(["created_by"=>$this->session->userdata('USER_ID'),"outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"11kv"],'11kv');
 		
-		$data['title']="Outage Request";
+		$data['title']="Planned Outages";
 		
 		$this->load->view('Layouts/header',$data);
 		$this->load->view('planned_outages/outage_req_officer',$data);
@@ -21,8 +21,8 @@ class Planned extends MY_Controller
 	//network manager
 	public function tsm_planned_outage(){
 		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-		$data['outages']=$this->planned_model->get_outage_all(["planned_outages.voltage_level"=>"33kv","request_from"=>$user->zone_id,"status !="=>7],'33kv');
-		$data['outages_11kv']=$this->planned_model->get_outage_all(["planned_outages.voltage_level"=>"11kv","request_from"=>$user->zone_id,"status !="=>7],'11kv');
+		$data['outages']=$this->planned_model->get_outage_all(["planned_outages.voltage_level"=>"33kv"],'33kv');
+		$data['outages_11kv']=$this->planned_model->get_outage_all(["planned_outages.voltage_level"=>"11kv"],'11kv');
 		//$data['trippings']=$this->planned_model->get_trippings(0);
 		$data['title']="Plan Outages";
 		$this->load->view('Layouts/header',$data);
@@ -30,18 +30,32 @@ class Planned extends MY_Controller
 		$this->load->view('Layouts/footer');
 				
 	}
+
+	// public function tsm_planned_outage(){
+	// 	$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+	// 	$data['outages']=$this->planned_model->get_outage_all(["planned_outages.voltage_level"=>"33kv","outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day"))],'33kv');
+	// 	$data['outages_11kv']=$this->planned_model->get_outage_all(["planned_outages.voltage_level"=>"11kv","outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day"))],'11kv');
+	// 	//$data['trippings']=$this->planned_model->get_trippings(0);
+	// 	$data['title']="Plan Outages";
+	// 	$this->load->view('Layouts/header',$data);
+	// 	$this->load->view('planned_outages/tsm_planned_outage',$data);
+	// 	$this->load->view('Layouts/footer');
+				
+	// }
 	// public function ht_supervisor(){
 	// 	$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-	// 	$data['outages']=$this->planned_model->get_outage_all(["status !="=>7]);
+	// 	$data['outages']=$this->planned_model->get_outage_all(["outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day"))]);
 	// 	$data['title']="Outages";
 	// 	$this->load->view('Layouts/header',$data);
 	// 	$this->load->view('planned_outages/ht_supervisor',$data);
 	// 	$this->load->view('Layouts/footer');			
 	// }
 	public function ht_coordinator(){
-		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-		$data['outages']=$this->planned_model->get_outage_all(["status !="=>7]);
-		$data['title']="Outages";
+		$data['outages']=$this->planned_model->get_outage_all(["created_by"=>$this->session->userdata('USER_ID'),"outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"33kv"],'33kv');
+		$data['outages_11kv']=$this->planned_model->get_outage_all(["created_by"=>$this->session->userdata('USER_ID'),"outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"11kv"],'11kv');
+		
+		$data['title']="Planned Outages";
+		//$data['title']="Outages";
 		$this->load->view('Layouts/header',$data);
 		$this->load->view('planned_outages/ht_coordinator',$data);
 		$this->load->view('Layouts/footer');		
@@ -51,21 +65,23 @@ class Planned extends MY_Controller
 	//feeder manager
 	public function hibc_planned_outage(){
 		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-		$data['outages']=$this->planned_model->get_outage_all(["planned_outages.equipment_id"=>$user->feeder33kv_id,"planned_outages.voltage_level"=>"33kv","status !="=>7],'33kv');
-		$data['outages_11kv']=$this->planned_model->get_outage_all(["planned_outages.equipment_id"=>$user->feeder33kv_id,"planned_outages.voltage_level"=>"11kv","status !="=>7],'11kv');
 
+		$data['outages']=$this->planned_model->get_outage_all(["planned_outages.equipment_id"=>$user->feeder33kv_id,"planned_outages.voltage_level"=>"33kv"],'33kv');
+
+		$data['outages_11kv']=$this->planned_model->get_outage_all(["fediss.feeder33"=>$user->feeder33kv_id],'11kv','feeder_manager');
 		
-		$data['title']="Outages";
+		$data['title']="Planned Outages";
 		$this->load->view('Layouts/header',$data);
 		$this->load->view('planned_outages/hibc_planned_outage',$data);
 		$this->load->view('Layouts/footer');
 				
 	}
+	//dso
 	public function tso_planned_outage(){
 		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
-		$data['outages']=$this->planned_model->get_outage_all(["request_from"=>$user->zone_id,"status !="=>7]);
+		$data['outages']=$this->planned_model->get_outage_all(["planned_outages.voltage_level"=>"11kv","planned_outages.voltage_level"=>"11kv","planned_outages.station_id"=>$user->iss],"11kv");
 		$data['faults']=$this->planned_model->get_fault_causes();
-		$data['title']="Outages";
+		$data['title']="DSO Outages";
 		$this->load->view('Layouts/header',$data);
 		$this->load->view('planned_outages/tso_planned_outage',$data);
 		$this->load->view('Layouts/footer');
@@ -73,7 +89,8 @@ class Planned extends MY_Controller
 	}
 	public function central_dispatch_planned_outage(){
 		
-		$data['outages']=$this->planned_model->get_outage_all(["status !="=>7]);
+		$data['outages']=$this->planned_model->get_outage_all(["outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"33kv"],"33kv");
+		$data['outages_11kv']=$this->planned_model->get_outage_all(["outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"11kv"],"11kv");
 		//$data['trippings']=$this->planned_model->get_trippings(0);
 		$data['title']="Outages";
 		$this->load->view('Layouts/header',$data);
@@ -83,11 +100,25 @@ class Planned extends MY_Controller
 	}
 	public function hso_planned_outage(){
 		
-		$data['outages']=$this->planned_model->get_outage_all(["status !="=>7]);
-		//$data['trippings']=$this->planned_model->get_trippings(0);
-		$data['title']="Outages";
+		$data['outages']=$this->planned_model->get_outage_all(["status"=>4,"planned_outages.voltage_level"=>"33kv"],"33kv");
+		$data['outages_11kv']=$this->planned_model->get_outage_all(["status"=>4,"planned_outages.voltage_level"=>"11kv"],"11kv");
+		
+		$data['title']="Planned Outages";
 		$this->load->view('Layouts/header',$data);
 		$this->load->view('planned_outages/hso_planned_outage',$data);
+		$this->load->view('Layouts/footer');
+				
+	}
+
+	public function zonal_head(){
+		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+		
+		$data['outages']=$this->planned_model->get_outage_all(["outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"33kv","request_from"=>$user->zone_id],"33kv");
+		$data['outages_11kv']=$this->planned_model->get_outage_all(["outage_request_date >="=>date("Y-m-d H:i:s",strtotime("-1 day")),"planned_outages.voltage_level"=>"11kv","request_from"=>$user->zone_id],"11kv");
+		
+		$data['title']="Planned Outages";
+		$this->load->view('Layouts/header',$data);
+		$this->load->view('planned_outages/zone_head_outage',$data);
 		$this->load->view('Layouts/footer');
 				
 	}
@@ -123,6 +154,7 @@ class Planned extends MY_Controller
 
 	public function store_plan_outage_request(){
 		$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+		//var_dump($user);
 		$department=$this->input->post("department");
 		//check if it transmission station station or injection substation
 		if ($this->input->post('asset_name')=="TS") {
@@ -172,34 +204,7 @@ class Planned extends MY_Controller
 			$plan_date=strtotime($this->input->post('outage_date'));
 			$end_date=date('Y-m-d H:i:s',strtotime('+'.$this->input->post('duration').' minutes',$plan_date));
 			
-			//if the user requesting has empty zones or zone is 7 then the user is in hq
-			if (empty($user->zone_id) || $user->zone_id==7) {
-				//request from hq
-				$status=2;
-				$status_message="Waiting HT coordinator acknowledgement";
-			} else{
-				$status=1;
-				//request from zones
-				$status_message="Waiting Feeder manager approval";
-			}
-			$outage_id=$this->uniqueId();
-			$insert_data=array("station_id"=>$station_id,"transformer_id"=>$transformer,"feeder_id"=>$this->input->post('feeder_id'),"duration"=>$this->input->post('duration'),"outage_request_date"=>$this->input->post('outage_date'),'permit_holder_id'=>$this->input->post('permit'),'reason'=>$this->input->post('reason'),'remark'=>$this->input->post('remark'),'voltage_level'=>$voltage_level,"created_by"=>$this->session->userdata('USER_ID'),"outage_id"=>$this->uniqueId(),"status_message"=>$status_message,"location"=>$this->input->post('location'),"ptw_type"=>$this->input->post('ptw_type'),"request_from"=>$user->zone_id,"end_date"=>$end_date,"equipment_id"=>$equipment,"category"=>$category,'oro_desig'=>$user->role_name);
-			//var_dump($insert_data);
-
-			$result=$this->planned_model->request_outage($insert_data);
-			if ($result['status']) {
-				$dataX = array();
-				$others_users=array();
-				$this->session->set_flashdata('success',$result['message']);
-				
-
-					//send email notification to coordinator responsible
-					//get user by role
-					//1st param ibc,2nd role
-				//check if request is from hq or from zones
-				$ht_coord_users=$this->admin_model->get_users_by_role(16);
-
-				if ($voltage_level=="33kv") {
+			if ($voltage_level=="33kv") {
 					//get  zone by transmission
 					$zone_id=$this->mis_model->get_transmission($station_id)->zone_id;
 
@@ -212,7 +217,7 @@ class Planned extends MY_Controller
 					//11kv
 
 					//get zone by iss
-					$zone_id=$this->admin_model->get_zone_by_iss($station_id);
+					$zone_id=$this->admin_model->get_zone_by_iss($station_id)->zone_id;
 
 					//get feeder manager
 					$feeder_manager=$this->admin_model->get_feeder_manager($equipment,"11kv");
@@ -220,23 +225,71 @@ class Planned extends MY_Controller
 					//get network manager
 					
 					}
+					$image="";
+					//upload supporting files.
+					 $config['upload_path']="./assets/uploads";
+        $config['allowed_types']='gif|jpg|png|pdf';
+        $config['encrypt_name'] = TRUE;
+         
+        $this->load->library('upload',$config);
+        if ($_FILES['support_docx']['error'] !== 4){
+        	//image is not empty
+        	if($this->upload->do_upload("support_docx")){
+            $data = array('upload_data' => $this->upload->data());
+ 
+            
+            $image= $data['upload_data']['file_name']; 
 
-					if (empty($user->zone_id) || $user->zone_id==7) {
-						//request from hq
-					//get ht coordinator details
-					//$st_users=$this->admin_model->get_users_by_role(16);
-				} 
+        }else{
+        	//error in image
+        	echo json_encode(["status"=>false,"message"=>"Image format not correct"]);
+        	return;
+
+        }
+        }else{
+        	//image is empty
+        	$image="";
+
+
+        }
+        // if($this->upload->do_upload("support_docx")){
+        //     $data = array('upload_data' => $this->upload->data());
+ 
+            
+        //     $image= $data['upload_data']['file_name']; 
+			$outage_id=$this->uniqueId();
+			$insert_data=array("station_id"=>$station_id,"transformer_id"=>$transformer,"feeder_id"=>$this->input->post('feeder_id'),"duration"=>$this->input->post('duration'),"outage_request_date"=>$this->input->post('outage_date'),'permit_holder_id'=>$this->input->post('permit'),'reason'=>$this->input->post('reason'),'remark'=>$this->input->post('remark'),'voltage_level'=>$voltage_level,"created_by"=>$this->session->userdata('USER_ID'),"outage_id"=>$this->uniqueId(),"status_message"=>"Waiting Feeder manager approval","location"=>$this->input->post('location'),"ptw_type"=>$this->input->post('ptw_type'),"request_from"=>$zone_id,"end_date"=>$end_date,"equipment_id"=>$equipment,"category"=>$category,'oro_desig'=>$user->role_name,"support_docx"=>$image);
+			//var_dump($insert_data);
+
+			$result=$this->planned_model->request_outage($insert_data);
+			if ($result['status']) {
+				$dataX = array();
+				$others_users=array();
+				$this->session->set_flashdata('success',$result['message']);
+				
+
+					//send email notification to coordinator responsible
+					//get user by role
+					//1st param ibc,2nd role
+				
+				$ht_coord_users=$this->admin_model->get_users_by_role(16);
+
+				
+
+					
 
 				//get name of equipment
 			$item=$this->getEquipmentName($category,$equipment);
 
 				if(isset($feeder_manager)){
 
-				foreach ($feeder_managers as $key => $user) {
-
-					array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.', <br/>'.'You have a planned outage acknowledgement request for '.$item.' '.$category.'... Please go to  '.base_url().' to acknowledge',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+				//foreach ($feeder_manager as $key => $user) {
+					foreach ($feeder_manager as $key => $user) {
+						array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.', <br/>'.'You have a planned outage acknowledgement request for '.$item.' '.$category.'... Please go to  '.base_url().' to acknowledge',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+					}
+					
 	
-						}
+						
 					}
 					
 					if ($ht_coord_users) {
@@ -253,7 +306,10 @@ class Planned extends MY_Controller
 			} else {
 				echo json_encode($result);
 			}
-	}
+		}
+	// }else{
+	// 	echo json_encode(["status"=>false,"message"=>"Image format not correct"]);	
+	// }
 }
 
 	
@@ -283,21 +339,32 @@ class Planned extends MY_Controller
 			//request officer
 			$oro=$this->admin_model->get_user_by_id($outage->created_by);
 			
-			$ht_coord_users=$this->admin_model->get_users_by_role(16);
+			//$ht_coord_users=$this->admin_model->get_users_by_role(16);
 			//get name of equipment
 				$item=$this->getEquipmentName($outage->category,$outage->equipment_id);
 
 			//get coodinator dispatch
+				$coordinator_dispatch=$this->admin_model->get_users_by_role(22);
+				//central dispatch
+				$dispatch=$this->admin_model->get_users_by_role(17);
+
+				//get hso
 			$hso=$this->admin_model->get_users_by_role(11);
 			//
 			
 			foreach ($hso as $key => $user) {
 				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' You have a planned outage approval request on '.$item.' '.$outage->category.' on ' .$outage->outage_request_date.' Please go to '.base_url().' to approve',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
 			}
-			foreach ($ht_coord_users as $key => $user) {
-				array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage request is approved by Network manager...Waiting HSO  approval',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+			foreach ($coordinator_dispatch as $key => $user) {
+				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' There is an outage request on '.$item.' '.$outage->category.' on ' .$outage->outage_request_date,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
 			}
-			array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage request is approved by Network manager...Waiting HSO  approval',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+			foreach ($dispatch as $key => $user) {
+				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' There is an outage request on '.$item.' '.$outage->category.' on ' .$outage->outage_request_date,"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+			}
+			// foreach ($ht_coord_users as $key => $user) {
+			// 	array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage request is approved by Network manager...Waiting HSO  approval',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+			// }
+			array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage request is approved by Network manager...Waiting HSO  approval',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$oro->last_name]);
 			if(count($dataX)>0){
 							$this->job_model->addToJob($dataX);
 							//$this->sendSMS(array("phone"=>implode(',', $sms_users),"message"=>$message));
@@ -393,15 +460,16 @@ class Planned extends MY_Controller
 			//
 			$tsm=$this->admin_model->get_users_by_zone_role($outage->request_from,14);
 			//$st_users=$this->admin_model->get_users_by_role(22);
-			$ht_coord_users=$this->admin_model->get_users_by_role(16);
+			//$ht_coord_users=$this->admin_model->get_users_by_role(16);
 			$oro=$this->admin_model->get_user_by_id($outage->created_by);
+			//send to network manager notification
 			foreach ($tsm as $key => $user) {
 				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' You have a planned outage approval request on '.$item.' '.$outage->category.' on ' .$outage->outage_request_date.' Please go to '.base_url().' to approve',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
 						}
 
-						foreach ($ht_coord_users as $key => $user) {
-				array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage request is approved by Feeder manager...Waiting Network manager approval',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
-						}
+				// 		foreach ($ht_coord_users as $key => $user) {
+				// array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage request is approved by Feeder manager...Waiting Network manager approval',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+				// 		}
 				//$this->sendEmail($user->email,"PHED NOMS NOTIFICATION",'Dear '.$user->last_name.', <br/>'.'You have a planned outage approval request... Please go to  the platform to approve');
 				//array_push($sms_users, $user->phone);	
 			
@@ -471,24 +539,24 @@ class Planned extends MY_Controller
 			}
 			array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage on '.$item.' '.$outage->category.' on ' .$outage->outage_request_date.' request is approved by HSO...Waiting DSO approval...',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
 
-			$dispatch_cordinator=$this->admin_model->get_users_by_role(22);
-			foreach ($dispatch_cordinator as $key => $user) {
-				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' Outage on '.$item.' '.$outage->category.' approved by HSO... waiting DSO approval ' .$outage->outage_request_date.' Please go to '.base_url().'',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
-			}
-				$dispatch=$this->admin_model->get_users_by_role(17);
-				foreach ($dispatch as $key => $user) {
-				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' Outage on '.$item.' '.$outage->category.' approved by HSO... waiting DSO approval ' .$outage->outage_request_date.' Please go to '.base_url().'',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
-			}
+			// $dispatch_cordinator=$this->admin_model->get_users_by_role(22);
+			// foreach ($dispatch_cordinator as $key => $user) {
+			// 	array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' Outage on '.$item.' '.$outage->category.' approved by HSO... waiting DSO approval ' .$outage->outage_request_date.' Please go to '.base_url().'',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+			// }
+			// 	$dispatch=$this->admin_model->get_users_by_role(17);
+			// 	foreach ($dispatch as $key => $user) {
+			// 	array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' Outage on '.$item.' '.$outage->category.' approved by HSO... waiting DSO approval ' .$outage->outage_request_date.' Please go to '.base_url().'',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+			// }
 			} else {
 				//33kv 
 				//get central dispatch;
 				//$status_message="Outage on ".$item." ".$outage->category." on ".$outage->outage_request_date." is approved by HSO...Go to Noms to start the outage when due";
-				$dispatch_cordinator=$this->admin_model->get_users_by_role(22);
-				foreach ($dispatch_cordinator as $key => $user) {
-				array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' Outage on '.$item.' '.$outage->category.' approve by HSO... waiting to start outage on ' .$outage->outage_request_date.' Please go to '.base_url().'',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
-			}
+				//$dispatch_cordinator=$this->admin_model->get_users_by_role(22);
+			// 	foreach ($dispatch_cordinator as $key => $user) {
+			// 	array_push($dataX, ["email"=>$user->email,"phone"=>$user->phone,"message"=>'Dear '.$user->last_name.' Outage on '.$item.' '.$outage->category.' approve by HSO... waiting to start outage on ' .$outage->outage_request_date.' Please go to '.base_url().'',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+			// }
 				//oro
-				array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage on '.$item.' '.$outage->category.' on ' .$outage->outage_request_date.' request is approved by HSO...Please go to '.base_url().' to print outage form...',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$user->last_name]);
+				array_push($dataX, ["email"=>$oro->email,"phone"=>$oro->phone,"message"=>'Outage on '.$item.' '.$outage->category.' on ' .$outage->outage_request_date.' request is approved by HSO...Please go to '.base_url().' to print outage form...',"subject"=>"PHED NOMS NOTIFICATION","status"=>"pending","name"=>$oro->last_name]);
 			}
 		
 		$result=$this->planned_model->approve_plan_out_hibc($outage_id,['hso_id'=>$this->session->userdata('USER_ID'),'status'=>5,"status_message"=>$status_message,'hso_approve_date'=>date("Y-m-d H:i:s")]);

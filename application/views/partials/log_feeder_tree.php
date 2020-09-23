@@ -8,7 +8,7 @@
             
       <div class="col-md-4 iss_log_div" id="" style="">
 <label>Injection Substation</label>
-<select class="form-control" name="iss_name" id="iss_name">
+<select class="form-control" style="width: 100%" name="iss_name" id="iss_name">
     <option value="">Injection Substation</option>
     <option value="<?= $station->id ?>"><?= $station->iss_names ?></option>
    
@@ -17,7 +17,7 @@
 <div class="col-md-4 iss_log_div" id="" style="">
 
     <label>Power Transformer</label>
-    <select class="form-control" name="transformer_iss" id="transformer_iss">
+    <select class="form-control" style="width: 100%" name="transformer_iss" id="transformer_iss">
     <option value="">No Transformer data</option>
                 
     </select>
@@ -35,7 +35,7 @@
             
       <div class="col-md-4 iss_log_div" id="" style="">
 <label>Transmission Substation</label>
-<select class="form-control" name="trans_st" id="trans_st">
+<select class="form-control" style="width: 100%" name="trans_st" id="trans_st">
     <option value="">Transmission Substation</option>
     <option value="<?= $station->id ?>"><?= $station->tsname ?></option>
    
@@ -44,7 +44,7 @@
 <div class="col-md-4 iss_log_div" id="" style="">
 
     <label>Power Transformer</label>
-    <select class="form-control"  name="transformer" id="transformer_33">
+    <select class="form-control" style="width: 100%"  name="transformer" id="transformer_33">
     <option value="">No Transformer data</option>
                 
     </select>
@@ -101,7 +101,7 @@
                         <div class="col-md-4 ts_div_log" id="">
 
                 <label>Power Transformer</label>
-                <select class="form-control" name="transformer" id="transformer_33">
+                <select style="width: 100%" class="form-control" name="transformer" id="transformer_33">
                 <option value="">No Transformer data</option>
                 
                  </select>
@@ -111,7 +111,7 @@
             
     <div class="col-md-4 iss_log_div" id="" style="display: none">
 <label>Injection Substation</label>
-<select class="form-control" name="iss_name" id="iss_name">
+<select style="width: 100%" class="form-control" name="iss_name" id="iss_name">
     <option value="">Injection Substation</option>
    
 </select>
@@ -119,7 +119,7 @@
 <div class="col-md-4 iss_log_div" id="" style="display: none">
 
     <label>Power Transformer</label>
-    <select class="form-control" name="transformer_iss" id="transformer_iss">
+    <select style="width: 100%" class="form-control" name="transformer_iss" id="transformer_iss">
     <option value="">No Transformer data</option>
                 
     </select>
@@ -145,7 +145,7 @@
                                            
                                                 <!-- <input required class="form-control" style="color: #333" type="text" name="captured_date" id="captured_date" /> -->
             <label> Hour</label>
-              <select required class="form-control" name="hour" id="hour">
+              <select  required class="form-control" name="hour" id="hour">
                 <option value=""> Hour</option>
                 <?php
                     for ($i=0; $i <=23 ;$i++) {

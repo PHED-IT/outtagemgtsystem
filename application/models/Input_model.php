@@ -4,13 +4,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * 
  */
-class Input_model extends CI_Model
+class Input_model extends MY_Model
 {
 	//protected $ibc_table_name="feederIbc";
 	protected $log_sheet_table="log_sheet";
 	protected $energy_sheet_table="energy_log_sheet";
 	protected $transmission_table="transmissions";
-	protected $feeder_hiarachy_table="feeder_hiarachy";
+	
 	protected $iss_tables="iss_tables";
 	//protected $transmission_transformer_table="transmission_transformer";
 	
@@ -166,8 +166,8 @@ class Input_model extends CI_Model
 				return ['status'=>false,"data"=>"Hour must be selected"];
 			}
 
-			$this->db->where(array('feeder_id'=>$feeder,'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],'voltage_level'=>$data['voltage_level']));
-			$q=$this->db->get($this->log_sheet_table);
+			$this->db->where(array('feeder_id'=>$feeder,'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],'voltage_level'=>$data['voltage_level'],"station_id"=>$data['station_id']));
+			$q=$this->db->get($this->log_sheet_table)->row();
 
 			if ($status==="on") {
 				// if ($i==2) {
@@ -195,11 +195,11 @@ class Input_model extends CI_Model
 				$load_mvr=0;
 				//return ['status'=>false,"data"=>"All Load(MVR) must be entered"];
 			}				
-			if ($q->num_rows()>0) {
+			if ($q) {
 				//reading has already been entered
 				return [
 					'status'=>false,
-					'data'=>"Log has been entered for this hour and date"
+					'data'=>" Log has been entered for this hour and date"
 				];
 			}else{
 				//var_dump(expression)
@@ -217,7 +217,7 @@ class Input_model extends CI_Model
 			}else{
 				//feeder is not on
 
-				if ($q->num_rows()>0) {
+				if ($q) {
 				//reading has already been entered
 				return [
 					'status'=>false,
@@ -262,8 +262,47 @@ class Input_model extends CI_Model
 				$load_mvr=sqrt(3)*sqrt(1-($pf*$pf))*$voltage*$current;
 
 				$result=$this->db->insert($this->log_sheet_table,array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$feeder,'load_reading'=>$reading,'pf'=>$pf,'voltage'=>$voltage,'current_reading'=>$current,'frequency'=>$frequency,'load_mvr'=>$load_mvr,'created_by'=>$data['created_by'],'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],'remarks'=>$remark,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer']));
+				$log_id=$this->db->insert_id();
+				//insert into interruption report
+				$this->db->insert("interruption_report",["feeder_id"=>$feeder,"status"=>"on","captured_at"=>$data['captured_date'],"hour"=>$data['hour'],"groupid"=>0,'voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id]);
 			}else{
 				$result=$this->db->insert($this->log_sheet_table,array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$feeder,'load_reading'=>0,'pf'=>0,'voltage'=>0,'current_reading'=>0,'frequency'=>0,'load_mvr'=>0,'created_by'=>$data['created_by'],'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],'remarks'=>$remark,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer']));
+				$log_id=$this->db->insert_id();
+				//work on inserting on interruption report
+				//select previous data from interruption report
+				$prevData=$this->prev_interruption_data($feeder,$data['voltage_level']);
+				//var_dump($prevData);
+				//check if prevdata exist
+				
+				if ($prevData) {
+					
+				//check if fault status== previous fault status
+				if ($prevData->status==$status) {
+					//insert into interruption table set groupid =prev group id
+					$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$feeder,'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],"groupid"=>$prevData->groupid,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+				} else {
+					#previous status not equal to status
+					//select from interruption report where faultid=faultid 
+					$prevData_status=$this->prev_interruption_data_by_status($feeder,$data['voltage_level'],$status);
+					
+					if ($prevData_status) {
+						$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$feeder,'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],"groupid"=>$prevData_status->groupid+1,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+					} else {
+						$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$feeder,'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],"groupid"=>$prevData->groupid+1,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+					}
+					
+					
+				}
+
+			}else {
+				
+				//previous data does not exist
+				$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$feeder,'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],"groupid"=>1,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+				
+			}
+
+				
+
 			}
 
 		}
@@ -357,6 +396,22 @@ class Input_model extends CI_Model
 		
 	}
 
+	//get previous data from interruption report 
+	public function prev_interruption_data($feeder_id,$voltage_level){
+		//$this->db->select(["hour","created_at"]);
+		$this->db->where(array('feeder_id'=>$feeder_id,"voltage_level"=>$voltage_level));
+		$this->db->order_by("id DESC");
+		return $this->db->get("interruption_report")->row();
+	}
+
+	//get previous data from interruption report for same status and feeder
+	public function prev_interruption_data_by_status($feeder_id,$voltage_level,$status){
+		//$this->db->select(["hour","created_at"]);
+		$this->db->where(array("status"=>$status,'feeder_id'=>$feeder_id,"voltage_level"=>$voltage_level));
+		$this->db->order_by("id DESC");
+		return $this->db->get("interruption_report")->row();
+	}
+
 	public function store_log_new($data){
 		
 			$prev=date('Y-m-d',strtotime("-1 days"));
@@ -443,10 +498,49 @@ class Input_model extends CI_Model
 					$reading=(sqrt(3)*$voltage*$current*$pf)/1000;
 				$load_mvr=sqrt(3)*sqrt(1-($pf*$pf))*$voltage*$current;
 				$result=$this->db->insert($this->log_sheet_table,array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$data['feeder'],'load_reading'=>$reading,'pf'=>$pf,'voltage'=>$voltage,'current_reading'=>$current,'frequency'=>$frequency,'load_mvr'=>$load_mvr,'created_by'=>$data['created_by'],'hour'=>$hour,'captured_at'=>$data['captured_date'],'remarks'=>$remark,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer']));
+				$log_id=$this->db->insert_id();
+
+				//insert into interruption report
+				$this->db->insert("interruption_report",["feeder_id"=>$data['feeder'],"status"=>"on","captured_at"=>$data['captured_date'],"hour"=>$hour,"groupid"=>0,'voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id]);
 				}
 			}else{
 				//feeder is not on 
 				$result=$this->db->insert($this->log_sheet_table,array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$data['feeder'],'load_reading'=>0,'pf'=>0,'voltage'=>0,'current_reading'=>0,'frequency'=>0,'load_mvr'=>0,'created_by'=>$data['created_by'],'hour'=>$hour,'captured_at'=>$data['captured_date'],'remarks'=>$remark,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer']));
+
+				$log_id=$this->db->insert_id();
+
+				//work on iserting to interruption report
+
+					$prevData=$this->prev_interruption_data($data['feeder'],$data['voltage_level']);
+				//var_dump($prevData);
+				//check if prevdata exist
+				
+				if ($prevData) {
+					
+				//check if fault status== previous fault status
+				if ($prevData->status==$status) {
+					//insert into interruption table set groupid =prev group id
+					$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$data['feeder'],'hour'=>$hour,'captured_at'=>$data['captured_date'],"groupid"=>$prevData->groupid,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+				} else {
+					#previous status not equal to status
+					//select from interruption report where faultid=faultid 
+					$prevData_status=$this->prev_interruption_data_by_status($data['feeder'],$data['voltage_level'],$status);
+					
+					if ($prevData_status) {
+						$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$data['feeder'],'hour'=>$hour,'captured_at'=>$data['captured_date'],"groupid"=>$prevData_status->groupid+1,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+					} else {
+						$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$data['feeder'],'hour'=>$hour,'captured_at'=>$data['captured_date'],"groupid"=>$prevData->groupid+1,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+					}
+					
+					
+				}
+
+			}else {
+				
+				//previous data does not exist
+				$this->db->insert("interruption_report",array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$data['feeder'],'hour'=>$hour,'captured_at'=>$data['captured_date'],"groupid"=>1,"status"=>$status,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer'],"log_id"=>$log_id));
+				
+			}
 			}
 			
 
@@ -535,6 +629,10 @@ class Input_model extends CI_Model
 
 			$record=$this->get_energy_by_feeder_date($feeder,$data['voltage_level']);
 			$hourly_consump=($record)?$energy-$record->energy:0;
+			// return [
+			// 	"status"=>false,
+			// 	"data"=>$hourly_consump
+			// ];
 			
 			
 			$result=$this->db->insert($this->energy_sheet_table,array('voltage_level'=>$data['voltage_level'],'station_id'=>$data['station_id'],'feeder_id'=>$feeder,'energy'=>$energy,'created_by'=>$data['created_by'],'hour'=>$data['hour'],'captured_at'=>$data['captured_date'],'remarks'=>$remark,'hourly_comsumption'=>$hourly_consump,"isIncommer"=>$isIncommer,"transformer_id"=>$data['transformer']
@@ -666,7 +764,7 @@ class Input_model extends CI_Model
 			
 		}else{
 			$this->db->select(array($data['log_type'],'hour','captured_at','status','id'));
-			$this->db->where(array('captured_at'=>$data['captured_at'],'feeder_id'=>$data['feeder_id'],"hour"=>$data['hour']));
+			$this->db->where(array('captured_at'=>$data['captured_at'],'feeder_id'=>$data['feeder_id'],"hour"=>$data['hour'],"isIncommer"=>$data['isIncommer']));
 			$query=$this->db->get($this->log_sheet_table);
 		}
 		
@@ -732,6 +830,8 @@ class Input_model extends CI_Model
   			$this->db->delete($this->energy_sheet_table);
 		}else{
 			$this->db->delete($this->log_sheet_table);
+			$this->db->where('log_id',$data['reading_id']); 
+			$this->db->delete("interruption_report");
 		}
 		return ["status"=>true];
 
@@ -769,27 +869,35 @@ class Input_model extends CI_Model
 		// }
 
 		//get previous data
-		if ($data['day']=="01") {
-			# check if is the first day of the month
-			//$hourly_consump=$data['reading']-$rowPrx->energy;
-			$this->db->where('id',$data['reading_id']);
-			$result=$this->db->update($this->energy_sheet_table,array($type=>$data['reading'],"updated_energy"=>$row->$type,"updated_at"=>date("Y-m-d H:i:s"),"hourly_comsumption"=>0));
-		} else {
-			$this->db->where(array("id <"=>$data['reading_id'],"isIncommer"=>$isIncommer));
+		// if ($data['day']=="01") {
+		// 	# check if is the first day of the month
+		// 	//$hourly_consump=$data['reading']-$rowPrx->energy;
+		// 	$this->db->where('id',$data['reading_id']);
+		// 	$result=$this->db->update($this->energy_sheet_table,array($type=>$data['reading'],"updated_energy"=>$row->$type,"updated_at"=>date("Y-m-d H:i:s"),"hourly_comsumption"=>0));
+		// } 
+		//else {
+			//return ['status'=>false,'message'=>$data['feeder_id']];
+			$this->db->where(array("id <"=>$data['reading_id'],"isIncommer"=>$isIncommer,"feeder_id"=>$data['feeder_id']));
 			$this->db->order_by("id","DESC");
 			$queryPrev=$this->db->get($this->energy_sheet_table);
 			$rowPrx= $queryPrev->row();
 		$type=$type;
 		//if ($row->$type>$data['reading'] || $rowPrx->$type>$data['reading']) {
-		if ( $rowPrx->$type>$data['reading']) {
+		if ($rowPrx) {
+			if ( $rowPrx->$type>$data['reading']) {
 			//updated reading is less than previous reading
 			return ['status'=>false,'message'=>"Energy must not be less than previous  reading({$rowPrx->energy})"];
 		} 
-
 		$hourly_consump=$data['reading']-$rowPrx->energy;
+		}else{
+			$hourly_consump=0;
+		}
+		
+
+		
 			$this->db->where('id',$data['reading_id']);
 			$result=$this->db->update($this->energy_sheet_table,array($type=>$data['reading'],"updated_energy"=>$row->$type,"updated_at"=>date("Y-m-d H:i:s"),"hourly_comsumption"=>$hourly_consump));
-		}
+		//}
 		
 		
 
@@ -860,6 +968,10 @@ class Input_model extends CI_Model
 		if ($data['status']=="on") {
 			$this->db->where('id',$data['reading_id']);
 			$result=$this->db->update($this->log_sheet_table,array($type=>$data['reading'],"load_reading"=>$reading,"load_mvr"=>$load_mvr,"updated_load_reading"=>$row->load_reading,"updated_current_reading"=>$row->current_reading,"updated_".$type=>$row->$type,"updated_at"=>date("Y-m-d H:i:s"),"status"=>$data['status']));
+
+			// $this->db->where('log_id',$data['reading_id']);
+			// $this->db->update("interruption_report",array("groupid"=>0,"status"=>"on"));
+
 		} else {
 			$this->db->where('id',$data['reading_id']);
 			$result=$this->db->update($this->log_sheet_table,array($type=>$data['reading'],"load_reading"=>0,"load_mvr"=>0,"updated_load_reading"=>$row->load_reading,"updated_current_reading"=>$row->current_reading,"updated_".$type=>$row->$type,"updated_at"=>date("Y-m-d H:i:s"),"status"=>$data['status']));
@@ -1005,18 +1117,8 @@ class Input_model extends CI_Model
 	
 		
 	// }
-	public function get_iss(){
-		//$this->db->distinct('ISS');
-		$this->db->select(array('id','iss_names'));
-		$query=$this->db->get($this->iss_tables);
-		return $query->result();
-	}
-	public function get_transmissions(){
-		//$this->db->distinct('ISS');
-		$this->db->select(array('id','tsname'));
-		$query=$this->db->get($this->transmission_table);
-		return $query->result();
-	}
+	
+	
 	public function get_iss_id($iss_id){
 		// $this->db->select('iss_names');
 		$this->db->where('id',$iss_id);

@@ -17,20 +17,21 @@
  </div>
                             <div class="card-body">
                                  <?php echo validation_errors('<div class="alert alert-danger mb-2">','</div>'); ?>
-                                <table id="simpleTable" class="table table-striped table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
-                                    <thead>
+                                <table  id="simpleTable" class="table table-striped table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
+                                    <thead style="background-color:#278acd;color:white">
                                         <tr>
-                                            <th>Staff ID</th>
-                                            <th>First Name</th>
-                                            <th>Last Name</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Role</th>
-                                            <th>Zone</th>
-                                            <th>33kv Feeder</th>
-                                            <th>ISS</th>
-                                            <th>Transmission</th>
-                                            <th></th>
+                                            <th style="color: #fff">Staff ID</th>
+                                            <th style="color: #fff">First Name</th>
+                                            <th style="color: #fff">Last Name</th>
+                                            <th style="color: #fff">Email</th>
+                                            <th style="color: #fff">Phone</th>
+                                            <th style="color: #fff">Role</th>
+                                            <th style="color: #fff">Zone</th>
+                                            <th style="color: #fff">33kv Feeder</th>
+                                            <th style="color: #fff">ISS</th>
+                                            <th style="color: #fff">Transmission</th>
+                                            <th style="color: #fff"></th>
+                                            <th style="color: #fff"></th>
                                             
                                         </tr>
                                     </thead>
@@ -51,6 +52,20 @@
                                                 <td><?= $user->iss; ?></td>
                                                 <td><?= $user->tsname; ?></td>
                                                 <td><a href="<?= base_url('admin/edit_user').'/'.$user->id ?>" class="btn btn-xs btn-info">Edit</a></td>
+                                                <td>
+                                                  <?php
+                                                  if ($user->blocked) {
+                                                    ?>
+                                                    <button id="<?= $user->id ?>" type="button" class="btn btn-xs btn-success unblock_user">Unblock</button>
+                                                    <?php
+                                                  } else {
+                                                   ?>
+                                                   <button type="button" id="<?= $user->id ?>" class="btn btn-xs btn-danger block_user">Block</button>
+                                                   <?php
+                                                  }
+                                                  
+                                                  ?>
+                                                </td>
                                                 
                                             </tr>
                                             <?php
@@ -81,7 +96,7 @@
                     <div class="col-md-12">
                         
                         <label class="col-form-label" required for=""> Role</label>
-                         <select class="form-control" required name="role" id="role">
+                         <select class="form-control" style="width: 100%" required name="role" id="role">
                           <option value="">Choose Role</option>
                           <?php
                               foreach ($roles as $key => $role) {
@@ -142,7 +157,7 @@
                         
                     <label class="col-form-label"  for=""> Zone</label>
                         
-                  <select class="form-control" id="zone_id" required  name="zone_id">
+                  <select class="form-control" id="zone_id" style="width: 100%" required  name="zone_id">
                <option value="">Choose zone</option>
                <?php
                 foreach ($zones as $key => $value) {

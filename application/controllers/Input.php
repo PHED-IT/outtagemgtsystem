@@ -43,7 +43,7 @@ class Input extends My_Controller
 		
 		//$this->input_model->insert_bot();
 		
-		 $data['ts_data']=$this->input_model->get_transmissions();
+		 $data['ts_data']=$this->input_model->get_transmission_stations();
 		
 		$data['title']="Log entry sheet";
 		//$data['summary']=$this->input_model->get_ibc_summary();
@@ -175,7 +175,7 @@ class Input extends My_Controller
 	public function get_transformer_iss(){
 		//$logType=$this->input->post('logType');
 		$iss_id=$this->input->post('iss_id');
-		$transformer=$this->admin_model->get_transformer_iss(array("st_id"=>$iss_id,"asset_type"=>"ISS"));
+		$transformer=$this->admin_model->get_transformer_iss(array("st_id"=>$iss_id));
 		echo json_encode($transformer);
 	}
 
@@ -314,7 +314,8 @@ class Input extends My_Controller
 	 	return $this->input_model->getReadingByFeeder($data);
 	 }
 	// //show the view for edit
-	public function edit_log(){
+	 //this is the main edit just change it to edit_log
+	public function edit_hourly_log(){
 		$this->form_validation->set_rules('captured_date','DATE',"required");
 		$this->form_validation->set_rules('feeders','FEEDER NAME',"required");
 		$this->form_validation->set_rules('log_type','LOG TYPE',"required");
@@ -357,6 +358,7 @@ class Input extends My_Controller
 			$data['summary']=$this->input_model->get_reading_feeder_date($insert_data);
 			
 			$feeder_name=$this->input_model->getFeeder($this->input->post('feeders'))->feeder_name;
+			$data['feeder_id']=$this->input->post('feeders');
 			$data['feeder_name']=$feeder_name;
 			$data['month']=$month;
 			$data['year']=$year;
@@ -382,6 +384,108 @@ class Input extends My_Controller
 		
 	}
 
+	
+	//this shows all selected reading by day and hour for edit
+	public function edit_log(){
+		$this->form_validation->set_rules('captured_date','DATE',"required");
+		// $this->form_validation->set_rules('station_id','STATION',"required");
+		$this->form_validation->set_rules('log_type','LOG TYPE',"required");
+		if ($this->form_validation->run()==FALSE){
+			$data['title']="Edit Log";
+			$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+			$data['user']=$user;
+			//this gets users station(transmision or injection sub station)
+			if ($user->role_id==8) {
+			#dso
+			$data['station']=$this->input_model->get_station($user);
+			} elseif($user->role_id==35) {
+				# transminssion dso
+				$data['station']=$this->input_model->get_transmission_by_user($user);
+			}
+
+			
+			$data['transmision']=$this->mis_model->get_transmission_stations();
+			$this->load->view('Layouts/header',$data);
+			$this->load->view('inputs/edit_hourly_log_sheet_new',$data);
+			$this->load->view('Layouts/footer');
+		}else{
+			$date=$this->input->post('captured_date');
+			$log_type=$this->input->post('log_type');
+			
+			$data['user']=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+			$user=$this->admin_model->get_user($this->session->userdata('USER_ID'));
+			$data['user']=$user;
+			//this gets users station(transmision or injection sub station)
+			if ($user->role_id==8) {
+			#dso
+			$data['station']=$this->input_model->get_station($user);
+			} elseif($user->role_id==35) {
+				# transminssion dso
+				$data['station']=$this->input_model->get_transmission_by_user($user);
+			}
+			//$data['station']=$this->input_model->get_station($data['user']);
+			$data['transmision']=$this->mis_model->get_transmission_stations();
+			
+			//$insert_data=array("station_id"=>$trans_id,"date"=>$this->input->post('captured_date'),"log_type"=>$this->input->post('log_type'));
+			// $month=substr($date, 0,2);
+			// $year=substr($date, 3,6);
+
+			 $data['status']=$this->mis_model->get_feeder_status();
+			 
+			
+		// 	$data['summary']=$this->input_model->getReadingByFeeder(['feeder_id'=>]);
+			
+		// 	//$feeder_name=$this->input_model->getFeeder($this->input->post('feeders'))->feeder_name;
+		// 	//$data['feeder_name']=$feeder_name;
+			// $data['month']=$month;
+			// $data['year']=$year;
+			$data['dt']="day";
+			$data['captured_at']=$date;
+			if ($log_type=="load_reading") {
+				$log_type_title="Load (MW)";
+			}elseif ($log_type=="load_mvr") {
+				$log_type_title="Load(MVR)";
+			}elseif ($log_type=="current_reading") {
+				$log_type_title="CURRENT(AMP)";
+			}elseif ($log_type=="pf") {
+				$log_type_title="Power Factor";
+			}  else {
+				$log_type_title=$log_type;
+			}
+			$data['log_type']=$log_type;
+			if (null !==$this->input->post('asset_type')) {
+					if ($this->input->post('asset_type')=="TS") {
+			 	//voltage_level==33kv
+			 	$trans_id=$this->input->post('transmission_id');
+			 	$data['transformers']=$this->admin_model->get_transformer_ts(["voltage_level"=>"33kv","st_id"=>$trans_id]);
+			 	$transmission_station=$this->mis_model->get_transmission($trans_id);
+			$title=$this->format_date("day",$date,$log_type_title,$transmission_station->tsname)['title'];
+			 } else {
+			 	//voltage_level==11kv
+			 	$trans_id=$this->input->post('substation_id');
+			 	$data['transformers']=$this->admin_model->get_transformer_iss(["voltage_level"=>"11kv","st_id"=>$trans_id]);
+			 	$substation_station=$this->mis_model->get_substation($trans_id);
+			$title=$this->format_date("day",$date,$log_type_title,$substation_station->iss_names)['title'];
+			 }
+			 
+			} else {
+				$trans_id=$this->input->post('transmission_id');
+			 	$data['transformers']=$this->admin_model->get_transformer_ts(["voltage_level"=>"33kv","st_id"=>$trans_id]);
+			 	$transmission_station=$this->mis_model->get_transmission($trans_id);
+			$title=$this->format_date("day",$date,$log_type_title,$transmission_station->tsname)['title'];
+			}
+			
+		
+			
+			$data['title']=$title;
+			$data['controller']=$this;
+			//$data['feeders']=$this->input_model->get_feeders();
+			$this->load->view('Layouts/header',$data);
+			$this->load->view('inputs/edit_hourly_log_sheet_new',$data);
+			$this->load->view('Layouts/footer');
+		}
+		
+	 }
 	// 
 	public function get_reading_date(){
 		$day=$this->input->post('day');
@@ -393,7 +497,7 @@ class Input extends My_Controller
 	}
 
 	public function update_reading(){
-		$insert_data=array("status"=>$this->input->post('status'),"day"=>$this->input->post('day'),"reading"=>$this->input->post('reading'),"reading_id"=>$this->input->post('reading_id'),'type'=>$this->input->post('type'),'feeder_name'=>$this->input->post('feeder_name'),"isIncommer"=>$this->input->post('isIncommer'));
+		$insert_data=array("status"=>$this->input->post('status'),"day"=>$this->input->post('day'),"reading"=>$this->input->post('reading'),"reading_id"=>$this->input->post('reading_id'),'type'=>$this->input->post('type'),'feeder_id'=>$this->input->post('feeder_id'),"isIncommer"=>$this->input->post('isIncommer'));
 		$result=$this->input_model->update_reading($insert_data);
 			 //echo $result;
 		echo json_encode($result);

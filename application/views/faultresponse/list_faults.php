@@ -130,7 +130,7 @@
                         
                         <label class=" col-form-label " for="reading"> Cause of Fault</label>
                         
-                        <select class="form-control" name="fault_cause">
+                        <select class="form-control" style="display: block;width: 100%" name="fault_cause">
                           <?php 
                             foreach ($faults as $key => $value) {
                               ?>
@@ -331,19 +331,80 @@
                  
 
                   <td>
-
-                   
-
-                         <button  class=" btn-primary" id="btn<?= $outage->outage_id ?>" data-toggle="modal" data-target="#modal<?= $outage->outage_id ?>" data-placement="bottom"
+                  <button  class=" btn-primary" id="btn<?= $outage->outage_id ?>" data-toggle="modal" data-target="#modal<?= $outage->outage_id ?>" data-placement="bottom"
                 title=" View"><span class="fa fa-flash"></span></button>
-                
+                <button  class=" btn-danger" id="btn<?= $outage->outage_id ?>" data-toggle="modal" data-target="#Closemodalr<?= $outage->outage_id ?>" data-placement="bottom"
+                title=" Close fault request">Closure</button>  
 
-                
-          
-
-
-       
+                <!-- write modal -->
+                          <div class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);z-index: 1" id="Closemodalr<?= $outage->outage_id ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form class="submit_report_lines_man" data-id="<?= $outage->outage_id ?>">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Write report</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="outage_id" value="<?= $outage->outage_id ?>">
+                 <div class="row">
+                   <div class="col-md-12">
                         
+                        <label class=" col-form-label " for="reading"> Cause of Fault</label>
+                        
+                        <select class="form-control" style="display: block;width: 100%" name="fault_cause">
+                          <?php 
+                            foreach ($faults as $key => $value) {
+                              ?>
+                            <option value="<?= $value->id ?>"><?= $value->name ?></option>
+                            <?php
+                            }
+                          ?>
+                        </select>
+                    </div>
+                 </div>
+                     <div class="row">
+                   <div class="col-md-12">
+              
+              <label class="col-form-label" for=""> Date and time closed</label>
+              <input type="text" required placeholder="Date and time closed" class="form-control" style="color: #333" type="text" name="date_closed" id="captured_date_time" />
+             
+              
+              </div>  
+                 </div>
+                     <div class="row">
+                   <div class="col-md-12">
+                        
+                        <label class=" col-form-label " for="reading"> Location</label>
+                        
+                        <input type="text" class="form-control" name="location">
+                        
+                    </div>
+                 </div>
+              <div class="mb-2" >
+                    <div class="row">
+                        <div class="col-md-12">
+                        <label class="col-form-label" for="reading"> Write Comprehensive report of work done</label>
+                        
+                       <textarea name="content" class="form-control "></textarea>
+                        
+                    </div>
+                    </div>
+                </div>
+               
+        
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-sm btn-outline-success" type="submit" id="sub<?= $outage->outage_id ?>">Submit</button>
+            <button class="btn btn-sm btn-outline-danger" type="button" data-dismiss="modal">Cancel</button>
+           
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>   
                   </td>               
               </tr>
               <?php

@@ -33,7 +33,7 @@ class Admin extends MY_Controller
 			$data['title']="Create User";
 			$data['roles']=$this->admin_model->get_roles();
 			$data['ts_data']=$this->input_model->get_transmission_stations();
-			$data['iss_data']=$this->input_model->get_iss();
+			$data['iss_data']=$this->admin_model->get_iss();
 			$this->load->view('Layouts/header',$data);
 			$this->load->view('create_user',$data);
 			$this->load->view('Layouts/footer');
@@ -69,8 +69,8 @@ class Admin extends MY_Controller
 		$data['zones']=$this->admin_model->get_zones();
 		//$data['sub_zones']=$this->admin_model->get_sub_zones();
 		$data['roles']=$this->admin_model->get_roles();
-		$data['iss_data']=$this->input_model->get_iss();
-		$data['transmissions']=$this->input_model->get_transmissions();
+		$data['iss_data']=$this->admin_model->get_iss();
+		$data['transmissions']=$this->admin_model->get_transmission_stations();
 		$data['feeders_33']=$this->input_model->get_33kvfeeders();
 		$data['title']="Get all users";
 		$this->load->view('Layouts/header',$data);
@@ -190,8 +190,8 @@ class Admin extends MY_Controller
 			
 			$data['zones']=$this->admin_model->get_zones();
 			$data['feeders_33']=$this->input_model->get_33kvfeeders();
-			$data['iss_data']=$this->input_model->get_iss();
-			$data['transmissions']=$this->input_model->get_transmissions();
+			$data['iss_data']=$this->admin_model->get_iss();
+			$data['transmissions']=$this->admin_model->get_transmission_stations();
 			$this->load->view('Layouts/header',$data);
 			$this->load->view('create_user',$data);
 			$this->load->view('Layouts/footer');
@@ -218,37 +218,20 @@ class Admin extends MY_Controller
 
 
 
-	public function block_user($user_id){
-		// if (empty($this->session->userdata('USER_ID'))) {
-		// 	redirect('login');
-		// }
-
-		$data=array('blocked'=>1);
-		$result=$this->admin_model->update_user($user_id,$data);
+	public function block_user(){
+		$result=$this->admin_model->update_user($this->input->post('user_id'),array("blocked"=>1));
 			
-		if ($result['status']==true) {
-			$this->session->set_flashdata('success',"User blocked successfully");
-			redirect('admin/view_users');
-		} else {
-			$this->session->set_flashdata('error',$result['message']);
-			redirect('admin/view_users');
-		}
+		echo json_encode($result);
+
 	}
 
-	public function unblock_user($user_id){
+	public function unblock_user(){
 		// if (empty($this->session->userdata('USER_ID'))) {
 		// 	redirect('login');
 		// }
-		$data=array('blocked'=>0);
-		$result=$this->admin_model->update_user($user_id,$data);
+		$result=$this->admin_model->update_user($this->input->post('user_id'),array("blocked"=>0));
 			
-		if ($result['status']==true) {
-			$this->session->set_flashdata('success',"User unblocked successfully");
-			redirect('admin/view_users');
-		} else {
-			$this->session->set_flashdata('error',$result['message']);
-			redirect('admin/view_users');
-		}
+		echo json_encode($result);
 	}
 
 	public function create_role(){
@@ -330,7 +313,7 @@ class Admin extends MY_Controller
 		if ($this->form_validation->run()==FALSE) {
 			//echo $role_id;
 			$data['title']="Add Feeder";
-			$data['iss_data']=$this->input_model->get_iss();
+			$data['iss_data']=$this->admin_model->get_iss();
 			//$data['transformers']=$this->admin_model->get_transformer("ISS");
 			$data['ibc']=$this->admin_model->get_ibc();
 			$data['table']=$this->admin_model->show_feeder_11_hierachy();
@@ -344,6 +327,10 @@ class Admin extends MY_Controller
 
 		}
 	}
+
+
+
+
 	public function feeder_33(){
 		// if (empty($this->session->userdata('USER_ID'))) {
 		// 	redirect('login');
@@ -356,7 +343,7 @@ class Admin extends MY_Controller
 		if ($this->form_validation->run()==FALSE) {
 			//echo $role_id;
 			$data['title']="Add Feeder";
-			$data['transmission_data']=$this->input_model->get_transmissions();
+			$data['transmission_data']=$this->admin_model->get_transmission_stations();
 			//$data['transformers']=$this->admin_model->get_transformer("TS");
 			# failed
 			$data['ibc']=$this->admin_model->get_ibc();
@@ -384,7 +371,7 @@ class Admin extends MY_Controller
 	//utility func.
 	public function feeder_zone(){
 		
-		$this->form_validation->set_rules('feeder','Feeder name ',"required");
+		$this->form_validation->set_rules('feeders[]','Feeder name ',"required");
 		//$this->form_validation->set_rules('permissions[]','Permission',"required");
 		
 		if ($this->form_validation->run()==FALSE) {
@@ -393,24 +380,26 @@ class Admin extends MY_Controller
 			$data['zones']=$this->admin_model->get_zones();
 			$data['sub_zones']=$this->admin_model->get_sub_zones();
 			
-			$data['iss_data']=$this->input_model->get_iss();
+			$data['iss_data']=$this->admin_model->get_iss();
 			$data['feeders_11']=$this->admin_model->get_feeders(["voltage_level"=>'11kv']);
 			$data['feeders_33']=$this->admin_model->get_feeders(["voltage_level"=>'33kv']);
+			$data['report']=$this->admin_model->get_feeder_zones();
+
 			
 			$this->load->view('Layouts/header',$data);
 			$this->load->view('add_feeder_zone',$data);
 			$this->load->view('Layouts/footer');
 		} else {
 			//$this->load->model('admin_model');
-			$insert_data=array('feeder'=>$this->input->post('feeder'),'transformer_id'=>$this->input->post('transformer_id'),'station_id'=>$this->input->post('station_id'),'station_type'=>"ISS",'permissions'=>implode(",", [1,2,3]));
-			$result=$this->admin_model->add_feeder($insert_data);
+			$insert_data=array('feeders'=>$this->input->post('feeders'),'zone_id'=>$this->input->post('zone_id'));
+			$result=$this->admin_model->add_feeder_zone($insert_data);
 			
 			if ($result['status']==true) {
-				$this->session->set_flashdata('success',"Feeder addes");
-				redirect('admin/feeder_11kv');
+				$this->session->set_flashdata('success',"Zone and feeders has been merged");
+				redirect('admin/feeder_zone');
 			} else {
 				$this->session->set_flashdata('error',$result['message']);
-				redirect('admin/feeder_11kv');
+				redirect('admin/feeder_zone');
 			}
 			
 
@@ -508,18 +497,19 @@ class Admin extends MY_Controller
 			
 		echo json_encode($result);
 	}
+	
 	public function add_feeder(){
 		
 		$result=$this->admin_model->add_feeder(array("feeder"=>$this->input->post('feeder'),"transformer_id"=>$this->input->post('transformer_id'),"station_id"=>$this->input->post('station_id'),'voltage_level'=>$this->input->post('voltage_level'),"ibc_id"=>$this->input->post('ibc')));
 			
 		echo json_encode($result);
 	}
-	public function add_feeder_zone(){
+	// public function add_feeder_zone(){
 		
-		$result=$this->admin_model->add_feeder_zone(array("feeder_id_11"=>$this->input->post('feeder_id_11'),"feeder_id_33"=>$this->input->post('feeder_id_33'),"iss_id"=>$this->input->post('iss_id'),"zone_id"=>$this->input->post('zone_id'),"sub_zone_id"=>$this->input->post('sub_zone_id')));
+	// 	$result=$this->admin_model->add_feeder_zone(array("feeder_id_11"=>$this->input->post('feeder_id_11'),"feeder_id_33"=>$this->input->post('feeder_id_33'),"iss_id"=>$this->input->post('iss_id'),"zone_id"=>$this->input->post('zone_id'),"sub_zone_id"=>$this->input->post('sub_zone_id')));
 			
-		echo json_encode($result);
-	}
+	// 	echo json_encode($result);
+	// }
 
 	
 
@@ -557,7 +547,7 @@ class Admin extends MY_Controller
 	}
 	public function iss_transformer(){
 		$iss_id=$this->input->post('iss_id');
-		$data=$this->admin_model->get_transformer_iss(array("st_id"=>$iss_id,"asset_type"=>"ISS"));
+		$data=$this->admin_model->get_transformer_iss(array("st_id"=>$iss_id));
 		echo json_encode($data);
 	}
 	public function ts_transformer(){

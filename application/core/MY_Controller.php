@@ -101,7 +101,7 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
         //$this->email->print_debugger();
     }
     protected function uniqueId(){
-        return hexdec(uniqid());
+        return "NOMS".substr(hexdec(uniqid()),7,14);
     }
 }
 

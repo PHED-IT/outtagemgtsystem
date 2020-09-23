@@ -42,7 +42,7 @@
                                     </div>
 
                                      <div class="col-md-4">
-                                        <label class="col-form-label" for="menu_names"> Menu</label>
+                                        <label class="col-form-label" for="menu_names"> Menu(Priviledges)</label>
                                         
                                             <select class="form-control" name="menu_id" id="choose_menu">
                                                 <option value="">Choose menu</option>
@@ -68,7 +68,7 @@
                                     </div>
 
                                       <div class="col-md-4">
-                                        <label class=" col-form-label" for="sub_menu"> Sub Menu</label>
+                                        <label class=" col-form-label" for="sub_menu"> Sub Menu(Priviledges)</label>
                                         
                                             <select required class="form-control multiple-selector" multiple="" name="sub_menu[]" id="sub_menu">
                                                 

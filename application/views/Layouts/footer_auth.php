@@ -1,8 +1,6 @@
+<!-- </div>
 </div>
-            <!-- /.login-center -->
-        </div>
-        <!-- /.d-flex -->
-    </div>
+</div> -->
     <!-- /.body-container -->
     <!-- Scripts -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

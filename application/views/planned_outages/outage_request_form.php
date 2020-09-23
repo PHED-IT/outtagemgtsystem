@@ -5,7 +5,7 @@
                                 <p class="text-muted">All bootstrap element classies</p> -->
             
                      
-                          <form  id="planSubmitForm">
+                          <form  id="planSubmitForm" enctype="multipart/form-data">
                             <div id="loader_submit"></div>
                             <div class="card">
                               <?php echo validation_errors('<div class="alert alert-danger mb-2">','</div>'); ?>
@@ -80,7 +80,7 @@
               </div>  
 
                   <div class="row">   
-              <div class="col-md-6"> 
+              <div class="col-md-4"> 
               <label class="col-form-label" for=""> Location</label>
              <input type="text" name="location" class="form-control">
               </div>  
@@ -94,7 +94,10 @@
                 </select>
               </div>
               
-
+              <div class="col-md-5"> 
+              <label class="col-form-label" for=""> <small>Supporting Document*You can scan document as pdf*(PDF,PNG,JPEG)</small></label>
+             <input type="file" name="support_docx"  class="form-control">
+              </div>
              
               </div>  
 

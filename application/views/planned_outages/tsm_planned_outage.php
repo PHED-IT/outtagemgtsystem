@@ -22,9 +22,10 @@
                     <div class="tab-content" id="myTabContent">
                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                         <!-- 33kv -->
-                        <table id="simpleTable1" class="table tables  table-bordered table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
+                        <table id="simpleTable3" class="table tables  table-bordered table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
                      <thead>
                       <tr>
+                       <th> S/N</th>
                        <th> Id</th>
                       <th>Equipment</th>
                       <th>Category</th>
@@ -38,14 +39,16 @@
                       <th>End Date</th>
                       <th></th>
                       <th></th>
+                      <th></th>
                                                    
                   </tr>
                     </thead>
                     <tbody>
       <?php
-          foreach ($outages as $outage) {
+          foreach ($outages as $key=> $outage) {
               ?>
               <tr>
+                <td><?= $key+1; ?></td>
                    <td><?= $outage->outage_id; ?></td>
                   <td style="font-size: 11px">
                     <?php
@@ -85,7 +88,51 @@
                   <td class="td"><?= date("d-M-Y h:i a",strtotime($outage->outage_request_date)); ?></td>
                   <td><?= $outage->duration; ?> min.</td>
                   <td class="td"><?= date("d-M-Y h:i a",strtotime($outage->end_date)); ?></td>
-                 
+                  <td class="td">
+                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modalFF<?= $outage->id ?>"><span class="fa fa-image"></span></button>
+                      <div class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);z-index: 1" id="modalFF<?= $outage->id ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document" >
+        <div class="modal-content">
+         
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Supporting Document</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body" >
+            <?php
+              if (empty($outage->support_docx)) {
+                ?>
+                <center><h4 class="text-danger">Suporting document was not uploaded</h4></center>
+                <?php
+              } else {
+                ?>
+                <div style="width: 100%;height: 300px;">
+                <img class="img-responsive" width="100%" height="100%" src="<?php echo asset_url();?>uploads/<?= $outage->support_docx ?>" />
+
+                
+              </div>
+                <?php
+              }
+              
+            ?>
+          </div>
+          <div class="modal-footer">
+            <?php
+            if (!empty($outage->support_docx)) {
+             ?>
+            <a href="<?php echo asset_url();?>uploads/<?= $outage->support_docx ?>" class="btn btn-sm btn-success" download="">Download document</a>
+          <?php } ?>
+            <button class="btn btn-sm btn-outline-danger" type="button" data-dismiss="modal">Cancel</button>
+           
+          </div>
+          
+        </div>
+      </div>
+    </div>
+                  </td>
+
                   <td>
                     <?php
                     if ($outage->status>=5) {
@@ -230,6 +277,7 @@
             <table id="simpleTable2" class="table tables  table-bordered table-responsive" data-toggle="datatables" data-plugin-options='{"searching": true}'>
                      <thead>
                       <tr>
+                       <th> S/N</th>
                        <th> Id</th>
                       <th>Equipment</th>
                       <th>Category</th>
@@ -243,14 +291,16 @@
                       <th>End Date</th>
                       <th></th>
                       <th></th>
+                      <th></th>
                                                    
                   </tr>
                     </thead>
                     <tbody>
       <?php
-          foreach ($outages_11kv as $outage) {
+          foreach ($outages_11kv as $key=> $outage) {
               ?>
               <tr>
+                <td><?= $key+1; ?></td>
                    <td><?= $outage->outage_id; ?></td>
                   <td style="font-size: 11px">
                     <?php
@@ -290,7 +340,50 @@
                   <td class="td"><?= date("d-M-Y h:i a",strtotime($outage->outage_request_date)); ?></td>
                   <td><?= $outage->duration; ?> min.</td>
                   <td class="td"><?= date("d-M-Y h:i a",strtotime($outage->end_date)); ?></td>
-                 
+                  <td class="td">
+                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#modalFF<?= $outage->id ?>"><span class="fa fa-image"></span></button>
+                      <div class="modal fade" data-backdrop="false" style="background-color: rgba(0, 0, 0, 0.5);z-index: 1" id="modalFF<?= $outage->id ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document" >
+        <div class="modal-content">
+         
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Supporting Document</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body" >
+            <?php
+              if (empty($outage->support_docx)) {
+                ?>
+                <center><h4 class="text-danger">Suporting document was not uploaded</h4></center>
+                <?php
+              } else {
+                ?>
+                <div style="width: 100%;height: 300px;">
+                <img class="img-responsive" width="100%" height="100%" src="<?php echo asset_url();?>uploads/<?= $outage->support_docx ?>" />
+
+                
+              </div>
+                <?php
+              }
+              
+            ?>
+          </div>
+          <div class="modal-footer">
+            <?php
+            if (!empty($outage->support_docx)) {
+             ?>
+            <a href="<?php echo asset_url();?>uploads/<?= $outage->support_docx ?>" class="btn btn-sm btn-success" download="">Download document</a>
+          <?php } ?>
+            <button class="btn btn-sm btn-outline-danger" type="button" data-dismiss="modal">Cancel</button>
+           
+          </div>
+          
+        </div>
+      </div>
+    </div>
+                  </td>
                   <td>
                     <?php
                     if ($outage->status>=5) {

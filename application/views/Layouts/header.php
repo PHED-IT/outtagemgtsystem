@@ -24,8 +24,8 @@
 
      <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet" type="text/css"> -->
    
-      <script src="http://maps.google.com/maps/api/js?key=AIzaSyC223rsW34u3YLJWAeFvquz-lxUL-SOUuk&sensor=false" 
-          type="text/javascript"></script>  
+     <!--  <script src="http://maps.google.com/maps/api/js?key=AIzaSyC223rsW34u3YLJWAeFvquz-lxUL-SOUuk&sensor=false" 
+          type="text/javascript"></script>  --> 
     
     <script type="text/javascript">
         window.BASE_URL="<?= base_url() ?>"
@@ -41,11 +41,11 @@
     <link rel="stylesheet" href="<?php echo asset_url();?>bundles/pretty-checkbox/pretty-checkbox.min.css">
      <link rel="stylesheet" href="<?php echo asset_url();?>css/MonthPicker.min.css">  
       <link rel="stylesheet" href="<?php echo asset_url();?>/bundles/izitoast/css/iziToast.min.css">
-       <script src="<?php echo asset_url();?>js/app.min.js" ></script>
-  <script src="https://code.jquery.com/jquery-migrate-3.0.0.min.js" ></script>
+      <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <style type="text/css">
+     
         #map {
-        height: 400px;  /* The height is 400 pixels */
+        height: 300px;  /* The height is 400 pixels */
         width: 100%;  /* The width is the width of the web page */
        }
          .ui-datepicker-calendar {
@@ -64,6 +64,13 @@
         .date_picker{
 
         }
+        .max {
+  color: green
+}
+
+.min {
+  color: "#000"
+}
         #loader_submit {
   display: none;
   position: fixed;
@@ -75,6 +82,45 @@
   background: rgba(0,0,0,0.75) url(<?php echo asset_url();?>img/small.gif) no-repeat center center;
   z-index: 10000;
 }
+
+
+.modal-contents {
+  border-radius: 0px;
+  box-shadow: 0 0 20px 8px rgba(0, 0, 0, 0.7) !important;
+}
+
+.modal-backdrop.show {
+  opacity: 0.75;
+}
+
+
+.loader_ss {
+  position: relative;
+  text-align: center;
+  margin: 15px auto 35px auto;
+  z-index: 9999;
+  display: block;
+  width: 80px;
+  height: 80px;
+  border: 10px solid rgba(0, 0, 0, .3);
+  border-radius: 50%;
+  border-top-color: #000;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
 /*.modal-backdrop {
   z-index: -1;
 }*/
@@ -171,12 +217,74 @@ th{
    /*position: relative;*/
   /*border-collapse: collapse; */
 }
-.td{white-space:nowrap !important}
+.td{
+  white-space:nowrap !important;
+  text-align: right !important;
+
+}
+
+select{
+        width: 100%;
+      }
+
+      .table-scroll {
+  position:relative;
+  /*max-width:600px;*/
+  margin:auto;
+  overflow:hidden;
+  border:1px solid #000;
+}
+
+
+
+
+.table-wrap {
+  width:100%;
+  overflow:auto;
+}
+.table-scroll table {
+  width:100%;
+  margin:auto;
+  border-collapse:separate;
+  border-spacing:0;
+}
+.table-scroll th, .table-scroll td {
+  padding:5px 10px;
+  border:1px solid #000;
+  background:#fff;
+  white-space:nowrap;
+  vertical-align:top;
+}
+.table-scroll thead, .table-scroll tfoot {
+  background:#f9f9f9;
+}
+.clone {
+  position:absolute;
+  top:0;
+  left:0;
+  pointer-events:none;
+}
+.clone th, .clone td {
+  visibility:hidden
+}
+.clone td, .clone th {
+  border-color:transparent
+}
+.clone tbody th {
+  visibility:visible;
+  color:red;
+}
+.clone .fixed-side {
+  border:1px solid #000;
+  background:#eee;
+  visibility:visible;
+}
+.clone thead, .clone tfoot{background:transparent;}
     </style>
 </head>
 
 <body>
-    <div class="loader"></div>
+    <!-- <div class="loader"></div> -->
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
             <div class="navbar-bg"></div>
@@ -251,10 +359,10 @@ th{
       <div class="main-sidebar sidebar-style-2" >
         <aside id="sidebar-wrapper">
           <div class="sidebar-brand">
-            <a href="">  <img alt="image" src="<?php echo asset_url();?>img/logo.png" class="header-logo" />
-                <!-- <span
-                class="logo-name" style="color: #3367b8">PHED</span>
- -->            </a>
+            <a href="">  <img alt="image"  src="<?php echo asset_url();?>img/rsz_1logo.png"  class="header-logo" />
+                <span
+                class="logo-name" style="color: #3367b8"> <img alt="image"  src="<?php echo asset_url();?>img/rsz_2logo.png"  class="" /></span>
+            </a>
           </div>
           <ul class="sidebar-menu">
             <li class="menu-header">Main</li>

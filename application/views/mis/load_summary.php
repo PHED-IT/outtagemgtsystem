@@ -13,9 +13,10 @@
                                         
                                               
      <select class="form-control report_type" name="report_type" id="type">
-        <option value="load_maximum">MAXIMUM LOAD(MW)</option>
-        <option value="coincidental">COINCINDENTAL LOAD(MW)</option>
-        <option value="summary">COINCINDENTAL PEAK LOAD(MW)</option>
+        <option value="load_maximum" <?= !isset($report_t)?'selected':'' ?>>MAXIMUM LOAD(MW)</option>
+        <option value="summation_transmission" <?= isset($report_t)&& $report_t=='summation_transmission'?'selected':'' ?>>SUMMATION TRANSMISSION (MW) </option>
+        <option value="phed_total" <?= isset($report_t)&&$report_t=='phed_total'?'selected':'' ?>>PHED TOTAL(MW)</option>
+        <option value="summary" <?= isset($report_t)&&$report_t=='coincendetal'?'selected':'' ?>>COINCINDENTAL SUMMARY(MW)</option>
     </select>
                                         
     </div>
@@ -43,13 +44,67 @@
                    
                <div class="col-md-3">
                
-              <label class="col-form-label" for="date_picker"> Choose Date</label>
+              <label class="col-form-label" for="date_picker"> Choose month</label>
               <div class="" style="position: relative !important;">
-                  <input placeholder="Choose date" class="form-control date_picker" style="color: #333" type="text" name="date"  autocomplete="off" id="date_picker" />
+                  <input placeholder="Choose month" class="form-control date_picker" style="color: #333" type="text" name="date"  autocomplete="off" id="date_picker" />
                
               
               </div>
             </div>
+           
+             <div class="col-md-2 peak_day_div " style="display: <?= isset($report_t)?'none':''; ?>">
+               
+              <label class="col-form-label" for="date_picker">Choose Day Hour</label>
+              <div class="btn-group">
+  <select style="height:40px !important" name="day_start" class="btn btn-info">
+    <?php
+    for ($i=0; $i <24 ; $i++) { 
+      ?>
+      <option value="<?= $i ?>" <?= $i==0?'selected':''?>><?= strlen($i)==1?'0'.$i:$i ?>:00</option>
+      <?php
+    }
+    ?>
+  </select>
+  <select style="height:40px !important" name="day_end" class="btn btn-info">
+    <?php
+    for ($i=0; $i <24 ; $i++) { 
+      ?>
+      <option value="<?= $i ?>" <?= $i==17?'selected':''?>><?= strlen($i)==1?'0'.$i:$i ?>:00</option>
+      <?php
+    }
+    ?>
+  </select>
+  
+</div>
+              
+            </div>
+<div class="col-md-2 peak_day_div" style="display: <?= isset($report_t)?'none':''; ?>">
+               
+              <label class="col-form-label">Choose Night Hour</label>
+              <div class="btn-group">
+  <select style="height:40px !important" name="night_start" class="btn btn-info">
+    <?php
+    for ($i=0; $i <24 ; $i++) { 
+      ?>
+      <option value="<?= $i ?>" <?= $i==18?'selected':''?>><?= strlen($i)==1?'0'.$i:$i ?>:00</option>
+      <?php
+    }
+    ?>
+  </select>
+  <select style="height:40px !important" name="night_end" class="btn btn-info">
+    <?php
+    for ($i=0; $i <24 ; $i++) { 
+      ?>
+      <option value="<?= $i ?>" <?= $i==23?'selected':''?>><?= strlen($i)==1?'0'.$i:$i ?>:00</option>
+      <?php
+    }
+    ?>
+  </select>
+  
+</div>
+              
+            </div>
+
             <div class="col-md-2 my-2">
                                             
                 <div class="form-group">
@@ -101,18 +156,8 @@
             <hr>
             
             <center>
-              <?php 
-            if (isset($total_load)) {
-              ?>
-              <table class="table table-bordered">
-                <thead style="background-color: #6777ef;color: #fff">
-                  <th style="color: #fff">Total Transformer Load(MW)</th>
-                  <th style="color: #fff">Total Feeder Load(MW)</th>
-                </thead>
-                <?php  echo isset($total_load)?$total_load:""; ?>
-              </table>
-              <?php } ?>
-             <table  class=" table-bordered table-striped " data-toggle="datatables" data-plugin-options='{"searching": true}'>
+             
+             <table  class=" table-bordered table-striped " id="<?= isset($report_t)&& $report_t=='summation_transmission'?'table_sum':'' ?>" data-toggle="datatables" data-plugin-options='{"searching": true}'>
                   <?php  echo isset($summary)?$summary:""; ?>
                         </table>   
                         </center> 

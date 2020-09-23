@@ -12,6 +12,23 @@
 
     <!-- General JS Scripts -->
  
+<!-- Modal -->
+<div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content modal-contents">
+      <div class="modal-body text-center">
+        <div class="loader_ss"></div>
+        <div clas="loader-txt">
+          <p style="color: #6372e6">Please wait report is loading...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal end for loader submit -->
+
+ <script src="<?php echo asset_url();?>js/app.min.js" ></script>
+  <script src="https://code.jquery.com/jquery-migrate-3.0.0.min.js" ></script>
   
 <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
 <!-- <script src="https://cdn.rawgit.com/digitalBush/jquery.maskedinput/1.4.1/dist/jquery.maskedinput.min.js"></script> -->
@@ -43,7 +60,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/trix/1.1.1/trix.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     <script src="<?php echo asset_url();?>js/chart.js?v=1.5"></script>
     <script src="<?php echo asset_url();?>js/MonthPicker.min.js"></script>

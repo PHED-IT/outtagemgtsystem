@@ -65,12 +65,16 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
 	
 public function cronNotify(){
 	$jobs=$this->job_model->getJobs();
+    if ($jobs) {
+        
+    
 	foreach ($jobs as $key => $value) {
 		$this->sendEmail($value->email,"PHED NOMS NOTIFICATION",'Dear '.$value->name.', <br/>'.$value->message);
 		$this->sendSMS(array("phone"=>$value->phone,"message"=>$value->message));
 
 		$this->job_model->deleteFromJob($value->id);
 	}
+}
 
 
 }

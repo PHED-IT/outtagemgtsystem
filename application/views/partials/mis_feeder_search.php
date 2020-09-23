@@ -7,7 +7,7 @@
             
       <div class="col-md-4 iss_log_div" id="" style="">
 <label>Injection Substation</label>
-<select class="form-control" name="iss_name" id="iss_name">
+<select style="width: 100%" class="form-control" name="iss_name" id="iss_name">
     <option value="">Injection Substation</option>
     <option value="<?= $station->id ?>"><?= $station->iss_names ?></option>
    
@@ -16,7 +16,7 @@
 <div class="col-md-4 iss_log_div" id="" style="">
 
     <label>Power Transformer</label>
-    <select class="form-control" name="transformer_iss" id="transformer_iss">
+    <select style="width: 100%" class="form-control" name="transformer_iss" id="transformer_iss">
     <option value="">No Transformer data</option>
                 
     </select>
@@ -52,7 +52,7 @@
              <div class="col-md-4 ts_div_log" id="">
 
             <label> Transmission station</label>
-                <select class="form-control" name="trans_st" id="trans_st">
+                <select style="width: 100%" class="form-control" name="trans_st" id="trans_st">
                  <option value=""> Transmission Station</option>
                     <?php
                         foreach ($ts_data as $key => $value) {
@@ -67,7 +67,7 @@
                         <div class="col-md-4 ts_div_log" id="">
 
                 <label>Power Transformer</label>
-                <select class="form-control" name="transformer" id="transformer_33">
+                <select style="width: 100%" class="form-control" name="transformer" id="transformer_33">
                 <option value="">No Transformer data</option>
                 
                  </select>
@@ -77,7 +77,7 @@
             
     <div class="col-md-4 iss_log_div" id="" style="display: none">
 <label>Injection Substation</label>
-<select class="form-control" name="iss_name" id="iss_name">
+<select style="width: 100%" class="form-control" name="iss_name" id="iss_name">
     <option value="">Injection Substation</option>
     <?php
         foreach ($iss_data as $key => $value) {
@@ -94,7 +94,7 @@
 <div class="col-md-4 iss_log_div" id="" style="display: none">
 
     <label>Power Transformer</label>
-    <select class="form-control" name="transformer_iss" id="transformer_iss">
+    <select style="width: 100%" class="form-control" name="transformer_iss" id="transformer_iss">
     <option value="">No Transformer data</option>
                 
     </select>
@@ -121,7 +121,7 @@
                                         <div class="col-md-3">
                                            
                                             <label class=" col-form-label"> Choose Date Type</label>
-                                            <select class="form-control" name="dt" id="date_type">
+                                            <select style="width: 100%" class="form-control" name="dt" id="date_type">
                                                 <option value="day" <?= isset($search_params)&&$search_params['dt']=="day"?'selected':'' ?>>Daily</option>
                                                 <option <?= isset($search_params)&&$search_params['dt']=="month"?'selected':'' ?>  value="month">Monthly</option>
                                                 

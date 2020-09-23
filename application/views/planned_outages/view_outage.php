@@ -344,7 +344,7 @@
              		echo "NO RESPONSE YET";
              	}elseif($outage->status>=4){
              		?>
-             		<span style="color:green">APPROVED</span>(<?= date("d F, Y H:i:a",strtotime($outage->cd_ack_date)).' '.$outage->dispatch_fname.' '.$outage->dispatch_lname  ?>)
+             		<span style="color:green">APPROVED</span>(<?= date("d F, Y H:i:a",strtotime($outage->hso_approve_date)).' '.$outage->dispatch_fname.' '.$outage->dispatch_lname  ?>)
              		<?php
              	}
              ?>	
